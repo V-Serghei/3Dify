@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment"
-    app:popupTheme="@style/Theme.3Dify.PopupOverlay">
+    app:popupTheme="@style/Theme.TestAplication.PopupOverlay">
 
     <TextView
         android:id="@+id/text_home"

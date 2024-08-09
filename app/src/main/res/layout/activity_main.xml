@@ -2,14 +2,12 @@
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_layout"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:background="?attr/colorPrimary"
-    tools:openDrawer="start"
-    >
-
+    tools:openDrawer="start">
     <include
         android:id="@+id/app_bar_main"
         layout="@layout/app_bar_main"
@@ -36,22 +34,22 @@
         app:subheaderColor="?attr/colorSecondary"
         >
 
-<!--        <LinearLayout-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:orientation="vertical"-->
-<!--            android:gravity="bottom|center"-->
-<!--            android:paddingBottom="16dp">-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="bottom|center"
+            android:paddingBottom="16dp">
 
-<!--&lt;!&ndash;            <Switch&ndash;&gt;-->
-<!--&lt;!&ndash;                android:id="@+id/switch_theme"&ndash;&gt;-->
-<!--&lt;!&ndash;                android:layout_width="wrap_content"&ndash;&gt;-->
-<!--&lt;!&ndash;                android:layout_height="50dp"&ndash;&gt;-->
-<!--&lt;!&ndash;                android:checked="false"&ndash;&gt;-->
-<!--&lt;!&ndash;                android:text="Dark Theme"&ndash;&gt;-->
-<!--&lt;!&ndash;                android:textColor="@color/text_color"&ndash;&gt;-->
-<!--&lt;!&ndash;                tools:ignore="UseSwitchCompatOrMaterialXml" />&ndash;&gt;-->
-<!--        </LinearLayout>-->
+            <Switch
+                android:id="@+id/switch_theme"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:checked="false"
+                android:text="Dark Theme"
+                android:textColor="?attr/colorOnPrimary"
+                tools:ignore="UseSwitchCompatOrMaterialXml" />
+        </LinearLayout>
 
     </com.google.android.material.navigation.NavigationView>
 

@@ -11,25 +11,25 @@
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home" />
 
-    <!--    <fragment-->
-<!--        android:id="@+id/nav_gallery"-->
-<!--        android:name="com.example.testaplication.ui.gallery.GalleryFragment"-->
-<!--        android:label="@string/menu_gallery"-->
-<!--        tools:layout="@layout/fragment_gallery" />-->
+    <fragment
+        android:id="@+id/nav_gallery"
+        android:name="com.app.threedify.ui.gallery.GalleryFragment"
+        android:label="@string/menu_gallery"
+        tools:layout="@layout/fragment_gallery" />
 
-<!--    <fragment-->
-<!--        android:id="@+id/nav_camera"-->
-<!--        android:name="com.example.testaplication.ui.camera.CameraFragment"-->
-<!--        android:label="@string/menu_camera"-->
-<!--        tools:layout="@layout/fragment_camera" />-->
-<!--    <fragment-->
-<!--        android:id="@+id/nav_settings"-->
-<!--        android:name="com.example.testaplication.ui.settings.SettingsFragment"-->
-<!--        android:label="@string/menu_settings"-->
-<!--        tools:layout="@layout/fragment_settings" />-->
-<!--    <fragment-->
-<!--        android:id="@+id/nav_about_us"-->
-<!--        android:name="com.example.testaplication.ui.aboutus.AboutUsFragment"-->
-<!--        android:label="@string/menu_about_us"-->
-<!--        tools:layout="@layout/fragment_about_us" />-->
+    <fragment
+        android:id="@+id/nav_camera"
+        android:name="com.app.threedify.ui.camera.CameraFragment"
+        android:label="@string/menu_camera"
+        tools:layout="@layout/fragment_camera" />
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.app.threedify.ui.settings.SettingsFragment"
+        android:label="@string/menu_settings"
+        tools:layout="@layout/fragment_settings" />
+    <fragment
+        android:id="@+id/nav_about_us"
+        android:name="com.app.threedify.ui.aboutus.AboutUsFragment"
+        android:label="@string/menu_about_us"
+        tools:layout="@layout/fragment_about_us" />
 </navigation>

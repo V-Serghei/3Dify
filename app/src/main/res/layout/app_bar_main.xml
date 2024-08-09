@@ -20,7 +20,7 @@
             app:titleTextColor="?attr/colorSecondary"
             android:layout_width="match_parent"
             android:layout_gravity="center"
-            android:layout_height="50dp"
+            android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             android:textAlignment="center"
             />
@@ -29,18 +29,18 @@
 
     <include layout="@layout/content_main" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <ImageButton
         android:id="@+id/fab"
-        android:backgroundTint="?attr/colorOnPrimary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginBottom="16dp"
-        android:importantForAccessibility="no"
+        android:layout_marginEnd="25dp"
+        android:layout_marginBottom="25dp"
+        android:background="@drawable/button_selector"
+        android:contentDescription="@string/description_fab"
+        android:importantForAccessibility="yes"
         app:srcCompat="@drawable/ic_menu_camera"
-        android:tint="@color/white"
-        />
+        app:tint="@color/total_white" />
 
 
 

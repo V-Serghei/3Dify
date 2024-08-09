@@ -1,5 +1,4 @@
-package com.app.threedify.ui.home
-
+package com.app.threedify.ui.aboutus
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,14 +6,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.app.threedify.databinding.FragmentHomeBinding
+import com.app.threedify.databinding.FragmentAboutUsBinding
 
-class HomeFragment : Fragment() {
+class AboutUsFragment:Fragment() {
+    private var _binding: FragmentAboutUsBinding? = null
 
-    private var _binding: FragmentHomeBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -22,14 +19,14 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java)
+        val aboutUsViewModel =
+            ViewModelProvider(this).get(AboutUsViewModel::class.java)
 
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentAboutUsBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textHome
-        homeViewModel.text.observe(viewLifecycleOwner) {
+        val textView: TextView = binding.textAboutUs
+        aboutUsViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
         return root

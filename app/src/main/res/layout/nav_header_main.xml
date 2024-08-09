@@ -9,7 +9,7 @@
     android:paddingLeft="45dp"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingBottom="60dp"
-    app:popupTheme="@style/Theme.3Dify.PopupOverlay">
+    app:popupTheme="@style/Theme.TestAplication.PopupOverlay">
 
     <ImageView
         android:id="@+id/imageView"

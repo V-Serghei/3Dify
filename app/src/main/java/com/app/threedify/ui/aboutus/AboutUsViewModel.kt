@@ -1,12 +1,12 @@
-package com.app.threedify.ui.settings
+package com.app.threedify.ui.aboutus
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class SettingsViewModel : ViewModel() {
+class AboutUsViewModel:ViewModel() {
     private val _text = MutableLiveData<String>().apply {
-        value = "This is settings Fragment"
+        value = "This is about us Fragment"
     }
     val text: LiveData<String> = _text
 }

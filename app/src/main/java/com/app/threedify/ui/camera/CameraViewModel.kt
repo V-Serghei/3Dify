@@ -1,12 +1,13 @@
-package com.app.threedify.ui.settings
+package com.app.threedify.ui.camera
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class SettingsViewModel : ViewModel() {
+class CameraViewModel : ViewModel() {
+
     private val _text = MutableLiveData<String>().apply {
-        value = "This is settings Fragment"
+        value = "This is camera Fragment"
     }
     val text: LiveData<String> = _text
 }
