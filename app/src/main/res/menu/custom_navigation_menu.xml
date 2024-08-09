@@ -1,0 +1,40 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:gravity="center"
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_menu_home"
+            android:title="@string/menu_home"
+            android:actionLayout="@layout/custom_menu_item" />
+        <item
+            android:gravity="center"
+            android:id="@+id/nav_camera"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="@string/camera"
+            android:actionLayout="@layout/custom_menu_item" />
+        <item
+            android:gravity="center"
+            android:id="@+id/nav_gallery"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="@string/menu_gallery"
+
+            android:actionLayout="@layout/custom_menu_item"
+            tools:targetApi="o" />
+        <item
+            android:gravity="center"
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_menu_settings"
+            android:title="@string/settings"
+            android:actionLayout="@layout/custom_menu_item" />
+        <item
+            android:gravity="center"
+            android:id="@+id/nav_about_us"
+            android:icon="@drawable/ic_menu_about_us"
+            android:title="@string/about_us"
+            android:actionLayout="@layout/custom_menu_item" />
+    </group>
+</menu>

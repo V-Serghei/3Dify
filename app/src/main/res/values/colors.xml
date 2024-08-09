@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="black">#2d2c2d</color>
+    <color name="white">#D8CED9</color>
+    <color name="dark_black">#000000</color>
+    <color name="total_white">#FFFFFF</color>
+    <color name="background_color">#2d2c2d</color>
+    <color name="purple">#77507C</color>
+    <color name="purple_pressed">#482E4B</color>
+
+    <color name="nav_item_text_selected">?attr/colorPrimaryVariant</color>
+    <color name="nav_item_ic_selected">?attr/colorSecondary</color>
+    <color name="nav_item_text_normal">?attr/colorSecondary</color>
+    <color name="nav_item_background_selected">?attr/colorSecondary</color>
+    <color name="text_color">?attr/colorSecondary</color>
+    <color name="ic_color">?attr/colorSecondary</color>
+    <color name="item_color_other">?attr/colorPrimary</color>
 </resources>
