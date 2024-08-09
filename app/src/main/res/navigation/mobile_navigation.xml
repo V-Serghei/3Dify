@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.app.threedify.ui.home.HomeFragment"
+        android:label="@string/menu_home"
+        tools:layout="@layout/fragment_home" />
+
+    <!--    <fragment-->
+<!--        android:id="@+id/nav_gallery"-->
+<!--        android:name="com.example.testaplication.ui.gallery.GalleryFragment"-->
+<!--        android:label="@string/menu_gallery"-->
+<!--        tools:layout="@layout/fragment_gallery" />-->
+
+<!--    <fragment-->
+<!--        android:id="@+id/nav_camera"-->
+<!--        android:name="com.example.testaplication.ui.camera.CameraFragment"-->
+<!--        android:label="@string/menu_camera"-->
+<!--        tools:layout="@layout/fragment_camera" />-->
+<!--    <fragment-->
+<!--        android:id="@+id/nav_settings"-->
+<!--        android:name="com.example.testaplication.ui.settings.SettingsFragment"-->
+<!--        android:label="@string/menu_settings"-->
+<!--        tools:layout="@layout/fragment_settings" />-->
+<!--    <fragment-->
+<!--        android:id="@+id/nav_about_us"-->
+<!--        android:name="com.example.testaplication.ui.aboutus.AboutUsFragment"-->
+<!--        android:label="@string/menu_about_us"-->
+<!--        tools:layout="@layout/fragment_about_us" />-->
+</navigation>

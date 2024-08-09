@@ -8,8 +8,11 @@ import android.widget.Switch
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
+import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -29,7 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var switchTheme: Switch
-//    private lateinit var navController: NavController
+    private lateinit var navController: NavController
 
     /////////////////////////////////////////////////////////////////
     //Should exist in every class which uses activities from VIEWERAPP
@@ -50,15 +53,15 @@ class MainActivity : AppCompatActivity() {
         //////////////////
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        setContentView(R.layout.activity_main)
 
         setSupportActionBar(binding.appBarMain.toolbar)
-        //navController = findNavController(R.id.nav_host_fragment_content_main)
+        navController = findNavController(R.id.nav_host_fragment_content_main_base)
 
         //open camera
 //        binding.appBarMain.fab.setOnClickListener {
 //            openCameraFragment()
 //        }
-//        val navController = findNavController(R.id.nav_host_fragment_content_main)
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
@@ -68,8 +71,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_home, R.id.nav_gallery, R.id.nav_camera, R.id.nav_about_us, R.id.nav_settings
             ), drawerLayout
         )
-        //setupActionBarWithNavController(navController, appBarConfiguration)
-        //navView.setupWithNavController(navController)
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        navView.setupWithNavController(navController)
 
 
         //theme night - light
@@ -97,12 +100,11 @@ class MainActivity : AppCompatActivity() {
 
 
         enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-//            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-//            insets
-//        }
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.drawer_layout)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
 
 
         /////////////////////////////////////////////////////////////////
@@ -149,15 +151,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        //menuInflater.inflate(R.menu.main, menu)
+        menuInflater.inflate(R.menu.main, menu)
 
         return true
     }
     //////////////////
     ////for interface
     //////////////////
-//    override fun onSupportNavigateUp(): Boolean {
-//        //val navController = findNavController(R.id.nav_host_fragment_content_main)
-//        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
-//    }
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment_content_main_base)
+        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
 }
