@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false"
+    >
+    <item android:drawable="@drawable/img_1_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_2_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_3_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_4_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_5_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_6_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_7_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_8_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_9_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_10_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_11_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_12_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_13_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_14_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_15_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_16_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_17_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_18_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_19_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_20_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_21_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_22_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_23_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_24_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_25_dark" android:duration="100" />
+    <item android:drawable="@drawable/img_26_dark" android:duration="100" />
+
+</animation-list>
