@@ -17,7 +17,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme._3Dify"
+        android:theme="@style/Theme.3Dify"
         tools:targetApi="31">
         <activity android:name=".SplashActivity"
             android:exported="true">
@@ -41,6 +41,9 @@
 <!--            </intent-filter>-->
         </activity>
         <meta-data android:name="com.google.ar.core" android:value="required" />
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>
