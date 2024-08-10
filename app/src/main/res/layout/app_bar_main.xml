@@ -5,25 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorPrimary"
-    tools:context=".MainActivity"
-    android:textAlignment="center"
-    >
+    tools:context=".MainActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAlignment="center"
-        >
+        android:layout_height="wrap_content">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             app:titleTextColor="?attr/colorSecondary"
             android:layout_width="match_parent"
-            android:layout_gravity="center"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:textAlignment="center"
-            />
+            android:background="?attr/colorPrimary" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -41,7 +34,5 @@
         android:importantForAccessibility="yes"
         app:srcCompat="@drawable/ic_menu_camera"
         app:tint="@color/total_white" />
-
-
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

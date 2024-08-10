@@ -1,8 +1,11 @@
 package com.app.threedify
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.Menu
 import android.view.ViewGroup
 import android.widget.Switch
@@ -17,6 +20,8 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -45,6 +50,7 @@ class MainActivity : AppCompatActivity() {
     ///for interface!!
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
     private lateinit var switchTheme: Switch
     private lateinit var navController: NavController
     ///for interface!!
@@ -60,17 +66,23 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.appBarMain.toolbar)
         navController = findNavController(R.id.nav_host_fragment_content_main)
 
-        binding.appBarMain.fab.setOnClickListener {
-            openCameraFragment()
-        }
+
         navController = findNavController(R.id.nav_host_fragment_content_main)
         val drawerLayout: DrawerLayout = binding.main
         val navView: NavigationView = binding.navView
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_camera, R.id.nav_about_us, R.id.nav_settings
+                R.id.nav_home, R.id.nav_camera, R.id.nav_gallery, R.id.nav_settings, R.id.nav_about_us,R.id.nav_home
             ), drawerLayout
         )
+        binding.appBarMain.fab.setOnClickListener {
+            openCameraFragment()
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                recreateStackAppBarConfiguration(drawerLayout, navView)
+            }, 100)
+        }
+
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
@@ -137,12 +149,35 @@ class MainActivity : AppCompatActivity() {
         /////////////////////////////////////////////////////////////////
     }
 
+    ////////////////////////////////////////////////////////////////
+    ///for interface!!
+    private fun recreateStackAppBarConfiguration(drawerLayout: DrawerLayout, navView: NavigationView) {
+        navController = findNavController(R.id.nav_host_fragment_content_main)
+        navController.clearBackStack(R.id.nav_home)
+        appBarConfiguration = AppBarConfiguration(
+            setOf(
+                R.id.nav_home, R.id.nav_camera, R.id.nav_gallery, R.id.nav_settings, R.id.nav_about_us
+            ), drawerLayout
+        )
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        navView.setupWithNavController(navController)
+    }
+
+
 
     ////////////////////////////////////////////////////////////////
     ///for interface!!
     private fun openCameraFragment() {
-        navController.navigate(R.id.nav_camera)
+        navController = findNavController(R.id.nav_host_fragment_content_main)
+        val navOptions = NavOptions.Builder()
+            .setPopUpTo(navController.graph.findStartDestination().id, inclusive = true) // Clear back stack up to start destination
+            .build()
+
+        navController.navigate(R.id.nav_camera, null, navOptions)
     }
+
+
+
     private fun setLightTheme() {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
     }
@@ -170,9 +205,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
+
     ///for interface!!
     ////////////////////////////////////////////////////////////////
 }
