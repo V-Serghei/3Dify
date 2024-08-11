@@ -2,7 +2,6 @@ package com.app.threedify
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -16,7 +15,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
@@ -29,7 +27,6 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.app.threedify.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
-import org.the3deer.app.model3D.view.ModelActivity
 import org.the3deer.util.android.AndroidURLStreamHandlerFactory
 import java.net.URL
 
