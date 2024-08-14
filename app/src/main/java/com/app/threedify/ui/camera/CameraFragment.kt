@@ -26,7 +26,9 @@ class CameraFragment : Fragment() {
         val root: View = binding.root
 
         arCoreManager.initialize(requireContext(), binding.arSceneView)
-
+        binding.togglePointCloudButton.setOnClickListener {
+            arCoreManager.togglePointCloud()
+        }
         return root
     }
 

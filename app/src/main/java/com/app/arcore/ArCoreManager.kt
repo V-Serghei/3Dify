@@ -2,6 +2,8 @@ package com.app.arcore
 
 import android.content.Context
 import com.google.ar.core.Config
+import com.google.ar.core.Frame
+import com.google.ar.core.PointCloud
 import com.google.ar.core.Session
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.FrameTime
@@ -13,6 +15,7 @@ class ArCoreManager {
     private lateinit var arSceneView: ArSceneView
     private lateinit var session: Session
     private lateinit var config: Config
+    private var pointCloudEnabled = false
 
     fun initialize(context: Context, arSceneView: ArSceneView) {
         this.arSceneView = arSceneView
@@ -44,7 +47,33 @@ class ArCoreManager {
              * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
              */
             val frame = arSceneView.arFrame
+            if (pointCloudEnabled && frame != null) {
+                displayPointCloud(frame)
+            }
         }
+    }
+
+    private fun displayPointCloud(frame: Frame) {
+        val pointCloud = frame.acquirePointCloud()
+        if (pointCloud != null) {
+
+            clearPreviousPointCloud()
+
+            renderPointCloud(pointCloud)
+
+            pointCloud.release()
+        }
+    }
+    private fun clearPreviousPointCloud() {
+
+    }
+
+    fun togglePointCloud() {
+        pointCloudEnabled = !pointCloudEnabled
+    }
+
+    private fun renderPointCloud(pointCloud: PointCloud) {
+
     }
 
     fun onPause() {
