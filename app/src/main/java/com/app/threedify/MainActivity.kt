@@ -170,13 +170,13 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun openCameraFragment() {
-        startActivity(Intent(this, ArcoreActivity::class.java))
-        finish()
-//        navController = findNavController(R.id.nav_host_fragment_content_main)
-//        val navOptions = NavOptions.Builder()
-//            .setPopUpTo(navController.graph.findStartDestination().id, inclusive = true)
-//            .build()
-//        navController.navigate(R.id.nav_camera, null, navOptions)
+//        startActivity(Intent(this, ArcoreActivity::class.java))
+//        finish()
+        navController = findNavController(R.id.nav_host_fragment_content_main)
+        val navOptions = NavOptions.Builder()
+            .setPopUpTo(navController.graph.findStartDestination().id, inclusive = true)
+            .build()
+        navController.navigate(R.id.nav_camera, null, navOptions)
     }
 
     // Set app theme to light mode
