@@ -2,6 +2,7 @@ package com.app.threedify
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -25,6 +26,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.app.arcore.ArcoreActivity
 import com.app.threedify.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
 import org.the3deer.util.android.AndroidURLStreamHandlerFactory
@@ -168,11 +170,13 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun openCameraFragment() {
-        navController = findNavController(R.id.nav_host_fragment_content_main)
-        val navOptions = NavOptions.Builder()
-            .setPopUpTo(navController.graph.findStartDestination().id, inclusive = true)
-            .build()
-        navController.navigate(R.id.nav_camera, null, navOptions)
+        startActivity(Intent(this, ArcoreActivity::class.java))
+        finish()
+//        navController = findNavController(R.id.nav_host_fragment_content_main)
+//        val navOptions = NavOptions.Builder()
+//            .setPopUpTo(navController.graph.findStartDestination().id, inclusive = true)
+//            .build()
+//        navController.navigate(R.id.nav_camera, null, navOptions)
     }
 
     // Set app theme to light mode
