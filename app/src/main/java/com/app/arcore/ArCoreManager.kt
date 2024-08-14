@@ -1,12 +1,8 @@
 package com.app.arcore
 
 import android.content.Context
-import android.Manifest
-import android.app.Activity
 import android.content.pm.PackageManager
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.app.arcore.helpers.CameraPermissionHelper
 import com.google.ar.core.Config
@@ -15,9 +11,6 @@ import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.FrameTime
 
 class ArCoreManager {
-
-
-
     private lateinit var arSceneView: ArSceneView
     private lateinit var session: Session
     private lateinit var config: Config
@@ -45,13 +38,13 @@ class ArCoreManager {
              *  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
              * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
              */
+            focusMode = Config.FocusMode.AUTO
             updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
             planeFindingMode = Config.PlaneFindingMode.DISABLED
         }
         session.configure(config)
         arSceneView.setupSession(session)
     }
-
     fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {
