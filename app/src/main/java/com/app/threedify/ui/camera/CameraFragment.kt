@@ -24,17 +24,18 @@ class CameraFragment : Fragment() {
 
         _binding = FragmentCameraBinding.inflate(inflater, container, false)
         val root: View = binding.root
+        arCoreManager.initialize(requireContext(), binding.arSceneView, requireActivity())
 
-        arCoreManager.initialize(requireContext(), binding.arSceneView)
         binding.togglePointCloudButton.setOnClickListener {
             arCoreManager.togglePointCloud()
         }
+
         return root
     }
 
     override fun onResume() {
         super.onResume()
-        arCoreManager.onResume()
+        arCoreManager.onResume(requireContext(),requireActivity())
     }
 
     override fun onPause() {
