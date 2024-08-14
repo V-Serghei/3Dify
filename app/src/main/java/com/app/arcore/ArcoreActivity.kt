@@ -1,6 +1,8 @@
 package com.app.arcore
 
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.app.threedify.databinding.ActivityArcoreBinding
 
@@ -14,7 +16,7 @@ class ArcoreActivity : AppCompatActivity() {
         binding = ActivityArcoreBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        arCoreManager.initialize(this, binding.arSceneView)
+        arCoreManager.initialize(this, binding.arSceneView, this)
     }
 
     override fun onResume() {

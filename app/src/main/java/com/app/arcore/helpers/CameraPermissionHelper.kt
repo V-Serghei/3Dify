@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 object CameraPermissionHelper {
     private const val CAMERA_PERMISSION_CODE = 0
     private const val CAMERA_PERMISSION = Manifest.permission.CAMERA
+    val CAMERA_PERMISSION_REQUEST_CODE = 0
 
     /** Check to see we have the necessary permissions for this app.  */
     fun hasCameraPermission(activity: Activity?): Boolean {

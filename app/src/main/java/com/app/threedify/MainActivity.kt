@@ -26,6 +26,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.app.arcore.ArCoreManager
 import com.app.arcore.ArcoreActivity
 import com.app.threedify.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
@@ -226,4 +227,12 @@ class MainActivity : AppCompatActivity() {
     //     intent.putExtra("backgroundColor", "1.0 1.0 1.0 1.0")
     //     startActivity(intent)
     // }
+        override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        val arCoreManager = ArCoreManager()
+        arCoreManager.initialize(this, findViewById(R.id.ar_scene_view), this)
+        arCoreManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
 }

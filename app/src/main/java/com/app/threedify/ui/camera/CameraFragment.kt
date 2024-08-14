@@ -25,7 +25,7 @@ class CameraFragment : Fragment() {
         _binding = FragmentCameraBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        arCoreManager.initialize(requireContext(), binding.arSceneView)
+        arCoreManager.initialize(requireContext(), binding.arSceneView, requireActivity())
 
         return root
     }
