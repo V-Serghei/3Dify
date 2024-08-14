@@ -12,7 +12,7 @@ import com.google.ar.sceneform.FrameTime
 
 class ArCoreManager {
     private lateinit var arSceneView: ArSceneView
-    private lateinit var session: Session
+    lateinit var session: Session
     private lateinit var config: Config
 
     fun initialize(context: Context, arSceneView: ArSceneView, activity: FragmentActivity) {
