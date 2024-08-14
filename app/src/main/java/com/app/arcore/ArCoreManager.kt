@@ -1,6 +1,12 @@
 package com.app.arcore
 
 import android.content.Context
+import android.Manifest
+import android.app.Activity
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.ar.core.Config
 import com.google.ar.core.Session
 import com.google.ar.sceneform.ArSceneView
@@ -14,9 +20,27 @@ class ArCoreManager {
     private lateinit var session: Session
     private lateinit var config: Config
 
+    // Request code for camera permission
+    private val CAMERA_PERMISSION_REQUEST_CODE = 0
+
     fun initialize(context: Context, arSceneView: ArSceneView) {
         this.arSceneView = arSceneView
 
+        // Check if camera permission is granted
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                context as Activity, arrayOf(Manifest.permission.CAMERA),
+                CAMERA_PERMISSION_REQUEST_CODE
+            )
+        } else {
+            // If permission is already granted, proceed with session setup
+            setupSession(context)
+        }
+    }
+
+    // Method to handle session setup after permission is granted
+    private fun setupSession(context: Context) {
         session = Session(context)
 
         config = Config(session).apply {
@@ -28,10 +52,23 @@ class ArCoreManager {
              */
             updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
             planeFindingMode = Config.PlaneFindingMode.DISABLED
-
         }
         session.configure(config)
         arSceneView.setupSession(session)
+    }
+
+    fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // If permission is granted, set up the ARCore session
+                setupSession(arSceneView.context)
+            } else {
+                // Permission denied, you may want to show a message to the user
+                Toast.makeText(arSceneView.context, "Camera permission is required for AR", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     fun onResume() {
