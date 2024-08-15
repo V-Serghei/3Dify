@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Menu
+import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.Switch
 import androidx.activity.OnBackPressedCallback
@@ -235,4 +236,10 @@ class MainActivity : AppCompatActivity() {
         arCoreManager.initialize(this, findViewById(R.id.ar_scene_view), this)
         arCoreManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
+
+    override fun onResume() {
+        super.onResume()
+
+    }
+
 }

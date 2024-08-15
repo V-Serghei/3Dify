@@ -20,6 +20,22 @@ object CameraPermissionHelper {
         return (ContextCompat.checkSelfPermission(activity!!, CAMERA_PERMISSION)
                 == PackageManager.PERMISSION_GRANTED)
     }
+    object CameraPermissionHelper {
+        const val CAMERA_PERMISSION_REQUEST_CODE = 0
+
+        fun hasCameraPermission(activity: Activity): Boolean {
+            return ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) ==
+                    PackageManager.PERMISSION_GRANTED
+        }
+
+        fun requestCameraPermission(activity: Activity) {
+            ActivityCompat.requestPermissions(
+                activity,
+                arrayOf(Manifest.permission.CAMERA),
+                CAMERA_PERMISSION_REQUEST_CODE
+            )
+        }
+    }
 
     /** Check to see we have the necessary permissions for this app, and ask for them if we don't.  */
     fun requestCameraPermission(activity: Activity?) {
