@@ -33,6 +33,14 @@
             android:theme="@style/Base.Theme._3Dify.NoActionBar">
         </activity>
         <activity
+            android:name=".RawDepthCodelabActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat"
+            android:screenOrientation="locked">
+
+        </activity>
+        <activity
             android:name="com.app.arcore.ArcoreActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat">

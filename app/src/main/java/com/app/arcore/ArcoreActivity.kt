@@ -1,20 +1,18 @@
 package com.app.arcore
 
 import android.annotation.SuppressLint
+import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
-import android.content.ContentValues.TAG
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContentProviderCompat.requireContext
-import com.app.arcore.helpers.CameraPermissionHelper
+import com.app.arcore.common.helpers.CameraPermissionHelper
 import com.app.threedify.R
 import com.app.threedify.databinding.ActivityArcoreBinding
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.exceptions.CameraNotAvailableException
-import com.google.ar.core.exceptions.UnavailableException
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
 
 class ArcoreActivity : AppCompatActivity() {
@@ -30,7 +28,7 @@ class ArcoreActivity : AppCompatActivity() {
         binding = ActivityArcoreBinding.inflate(layoutInflater)
         setContentView(binding.root)
         surfaceView = findViewById(R.id.ar_scene_view)
-        arCoreManager.initialize(this, binding.arSceneView, this)
+        //arCoreManager.initialize(this, binding.arSceneView, this)
     }
     @SuppressLint("SetTextI18n")
     override fun onResume() {

@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Menu
-import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.Switch
 import androidx.activity.OnBackPressedCallback
@@ -20,15 +19,12 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.app.arcore.ArCoreManager
-import com.app.arcore.ArcoreActivity
 import com.app.threedify.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
 import org.the3deer.util.android.AndroidURLStreamHandlerFactory
@@ -172,13 +168,13 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun openCameraFragment() {
-//        startActivity(Intent(this, ArcoreActivity::class.java))
-//        finish()
-        navController = findNavController(R.id.nav_host_fragment_content_main)
-        val navOptions = NavOptions.Builder()
-            .setPopUpTo(navController.graph.findStartDestination().id, inclusive = true)
-            .build()
-        navController.navigate(R.id.nav_camera, null, navOptions)
+        startActivity(Intent(this, RawDepthCodelabActivity::class.java))
+        finish()
+//        navController = findNavController(R.id.nav_host_fragment_content_main)
+//        val navOptions = NavOptions.Builder()
+//            .setPopUpTo(navController.graph.findStartDestination().id, inclusive = true)
+//            .build()
+//        navController.navigate(R.id.nav_camera, null, navOptions)
     }
 
     // Set app theme to light mode

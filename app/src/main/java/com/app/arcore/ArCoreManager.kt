@@ -2,11 +2,10 @@ package com.app.arcore
 
 import android.content.ContentValues.TAG
 import android.content.Context
-import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
-import com.app.arcore.helpers.CameraPermissionHelper
+import com.app.arcore.common.helpers.CameraPermissionHelper
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Frame
@@ -64,16 +63,16 @@ class ArCoreManager {
     fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {
-        if (requestCode == CameraPermissionHelper.CAMERA_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // If permission is granted, set up the ARCore session
-                setupSession(arSceneView.context)
-            } else {
-                // Permission denied, show a message
-                Toast.makeText(arSceneView.context, "Camera permission is required for AR", Toast.LENGTH_LONG).show()
-                isSessionReady = false
-            }
-        }
+//        if (requestCode == CameraPermissionHelper.CAMERA_PERMISSION_REQUEST_CODE) {
+//            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                // If permission is granted, set up the ARCore session
+//                setupSession(arSceneView.context)
+//            } else {
+//                // Permission denied, show a message
+//                Toast.makeText(arSceneView.context, "Camera permission is required for AR", Toast.LENGTH_LONG).show()
+//                isSessionReady = false
+//            }
+//        }
     }
 
     fun onResume(context: Context, activity: FragmentActivity) {
