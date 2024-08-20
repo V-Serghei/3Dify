@@ -187,12 +187,6 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, RawDepthCodelabActivity::class.java)
         intent.putExtra("fromMenu", fromMenu)
         startActivity(intent)
-//        startActivity(Intent(this, RawDepthCodelabActivity::class.java))
-//        navController = findNavController(R.id.nav_host_fragment_content_main)
-//        val navOptions = NavOptions.Builder()
-//            .setPopUpTo(navController.graph.findStartDestination().id, inclusive = true)
-//            .build()
-//        navController.navigate(R.id.nav_camera, null, navOptions)
     }
 
     // Set app theme to light mode
