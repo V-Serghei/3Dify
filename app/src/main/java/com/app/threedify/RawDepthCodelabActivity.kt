@@ -19,6 +19,8 @@ import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.app.arcore.common.helpers.AABB
@@ -48,6 +50,7 @@ import java.io.IOException
 import java.nio.FloatBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+
 
 /**
  * This is a simple example that shows how to create an augmented reality (AR) application using the
@@ -82,6 +85,10 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         surfaceView!!.setWillNotDraw(false)
 
         installRequested = false
+
+        val backButton = findViewById<ImageButton>(R.id.back_button)
+        backButton.setOnClickListener { v: View? -> finish() }
+
     }
 
     override fun onResume() {
