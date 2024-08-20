@@ -20,6 +20,7 @@ import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -70,6 +71,9 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     private val backgroundRenderer: BackgroundRenderer = BackgroundRenderer()
     private val boxRenderer: BoxRenderer = BoxRenderer()
 
+    private lateinit var toggleModeButtonCamera: Button
+    private var currentMode = Mode.CAMERA
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_arcore)
@@ -89,6 +93,10 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         val backButton = findViewById<ImageButton>(R.id.back_button)
         backButton.setOnClickListener {  finish() }
 
+        toggleModeButtonCamera = findViewById(R.id.toggleModeButtonCamera)
+        toggleModeButtonCamera.setOnClickListener {
+            toggleMode()
+        }
 
     }
 
@@ -169,7 +177,9 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         // Note that order matters - see the note in onPause(), the reverse applies here.
         surfaceView!!.onResume()
         displayRotationHelper?.onResume()
-        messageSnackbarHelper.showMessage(this, "Waiting for depth data...")
+        if (currentMode == Mode.RAW_DEPTH) {
+            messageSnackbarHelper.showMessage(this, "Waiting for depth data...")
+        }
     }
 
     override fun onPause() {
@@ -253,12 +263,20 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             // If frame is ready, render camera preview image to the GL surface.
             backgroundRenderer.draw(frame)
 
-            // Retrieve the depth data for this frame.
-            val points: FloatBuffer = DepthData.create(frame, session!!.createAnchor(camera.pose))
-                ?: return
+            //If the raw depth mode chosen, visualize depth points
+            if (currentMode == Mode.RAW_DEPTH) {
+                // Retrieve the depth data for this frame.
+                val points: FloatBuffer = DepthData.create(frame, session!!.createAnchor(camera.pose))
+                    ?: return
 
-            if (messageSnackbarHelper.isShowing && points != null) {
-                messageSnackbarHelper.hide(this)
+                if (messageSnackbarHelper.isShowing && points != null) {
+                    messageSnackbarHelper.hide(this)
+                }
+                // Filters the depth data.
+                DepthData.filterUsingPlanes(points, session!!.getAllTrackables(Plane::class.java))
+                // Visualize depth points.
+                depthRenderer.update(points)
+                depthRenderer.draw(camera)
             }
 
             // If not tracking, show tracking failure reason instead.
@@ -269,19 +287,14 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                 return
             }
 
-            // Filters the depth data.
-            DepthData.filterUsingPlanes(points, session!!.getAllTrackables(Plane::class.java))
+            //If you want drawn boxes uncomment
+//            // Draw boxes around clusters of points.
+//            val clusteringHelper: PointClusteringHelper = PointClusteringHelper(points)
+//            val clusters: List<AABB> = clusteringHelper.findClusters()
+//            for (aabb in clusters) {
+//                boxRenderer.draw(aabb, camera)
+//            }
 
-            // Visualize depth points.
-            depthRenderer.update(points)
-            depthRenderer.draw(camera)
-
-            // Draw boxes around clusters of points.
-            val clusteringHelper: PointClusteringHelper = PointClusteringHelper(points)
-            val clusters: List<AABB> = clusteringHelper.findClusters()
-            for (aabb in clusters) {
-                boxRenderer.draw(aabb, camera)
-            }
         } catch (t: Throwable) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t)
@@ -290,5 +303,21 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
 
     companion object {
         private val TAG: String = RawDepthCodelabActivity::class.java.simpleName
+    }
+    //When camera mode changed, change label and visualisation
+    private fun toggleMode() {
+        currentMode = when (currentMode) {
+            Mode.CAMERA -> Mode.RAW_DEPTH
+            Mode.RAW_DEPTH -> Mode.CAMERA
+        }
+        toggleModeButtonCamera.text = when (currentMode) {
+            Mode.CAMERA -> getString(R.string.toggleButtonCameraText)
+            Mode.RAW_DEPTH -> getString(R.string.toggleButtonRawDepthText)
+        }
+    }
+
+    enum class Mode {
+        CAMERA,
+        RAW_DEPTH
     }
 }

@@ -26,4 +26,21 @@
         android:elevation="4dp"
         android:backgroundTint="@android:color/transparent"
         app:tint="@android:color/white" />
+
+    <Button
+        android:id="@+id/toggleModeButtonCamera"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="top|end"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/button_selector"
+        android:maxWidth="150dp"
+        android:text="@string/toggleButtonCameraText"
+        android:textColor="@color/total_white" />
+
 </RelativeLayout>

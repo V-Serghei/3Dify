@@ -21,4 +21,6 @@
     <string name="description_fab" translatable="false">Open Camera</string>
     <string name="dark_theme" translatable="false">Dark Theme</string>
     <string name="back_button_description">Back Button</string>
+    <string name="toggleButtonCameraText">Camera</string>
+    <string name="toggleButtonRawDepthText">RawDepth</string>
 </resources>
