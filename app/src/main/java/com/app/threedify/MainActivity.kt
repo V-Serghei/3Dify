@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.Menu
 import android.view.ViewGroup
 import android.widget.Switch
@@ -21,10 +19,12 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.app.arcore.ArCoreManager
+import com.app.arcore.common.helpers.NavigationState
 import com.app.threedify.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
 import org.the3deer.util.android.AndroidURLStreamHandlerFactory
@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private lateinit var switchTheme: Switch
     private lateinit var navController: NavController
+    private var savedNavigationState: NavigationState = NavigationState.HOME
     ///for interface!!
     ////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////
@@ -99,15 +100,29 @@ class MainActivity : AppCompatActivity() {
             setOf(R.id.nav_home, R.id.nav_camera, R.id.nav_gallery, R.id.nav_settings, R.id.nav_about_us),
             drawerLayout
         )
-        binding.appBarMain.fab.setOnClickListener {
-            openCameraFragment()
-            Handler(Looper.getMainLooper()).postDelayed({
-                recreateStackAppBarConfiguration(drawerLayout, navView)
-            }, 100)
-        }
 
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        navView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_camera -> {
+                    openCameraActivity(fromMenu = true)
+                    true
+                }
+                else -> {
+                    val handled = NavigationUI.onNavDestinationSelected(menuItem, navController)
+                    if (handled) {
+                        drawerLayout.closeDrawer(GravityCompat.START)
+                    }
+                    handled
+                }
+            }
+        }
+        binding.appBarMain.fab.setOnClickListener {
+            openCameraActivity(fromMenu = false)
+        }
+
     }
 
 
@@ -167,8 +182,12 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun openCameraFragment() {
-        startActivity(Intent(this, RawDepthCodelabActivity::class.java))
+    private fun openCameraActivity(fromMenu: Boolean) {
+        saveCurrentNavigationState()
+        val intent = Intent(this, RawDepthCodelabActivity::class.java)
+        intent.putExtra("fromMenu", fromMenu)
+        startActivity(intent)
+//        startActivity(Intent(this, RawDepthCodelabActivity::class.java))
 //        navController = findNavController(R.id.nav_host_fragment_content_main)
 //        val navOptions = NavOptions.Builder()
 //            .setPopUpTo(navController.graph.findStartDestination().id, inclusive = true)
@@ -234,7 +253,45 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-
+        restoreNavigationState()
+        val navView: NavigationView = binding.navView
+        val menu = navView.menu
+        val currentFragmentId = when (savedNavigationState) {
+            NavigationState.HOME -> R.id.nav_home
+            NavigationState.CAMERA -> R.id.nav_camera
+            NavigationState.GALLERY -> R.id.nav_gallery
+            NavigationState.SETTINGS -> R.id.nav_settings
+            NavigationState.ABOUT_US -> R.id.nav_about_us
+        }
+        for (i in 0 until menu.size()) {
+            menu.getItem(i).isChecked = menu.getItem(i).itemId == currentFragmentId
+        }
     }
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        intent.removeExtra("fromMenu")
+    }
+    private fun saveCurrentNavigationState() {
+        savedNavigationState = when (navController.currentDestination?.id) {
+            R.id.nav_home -> NavigationState.HOME
+            R.id.nav_camera -> NavigationState.CAMERA
+            R.id.nav_gallery -> NavigationState.GALLERY
+            R.id.nav_settings -> NavigationState.SETTINGS
+            R.id.nav_about_us -> NavigationState.ABOUT_US
+            else -> NavigationState.HOME
+        }
+    }
+
+    private fun restoreNavigationState() {
+        when (savedNavigationState) {
+            NavigationState.HOME -> navController.navigate(R.id.nav_home)
+            NavigationState.CAMERA -> navController.navigate(R.id.nav_camera)
+            NavigationState.GALLERY -> navController.navigate(R.id.nav_gallery)
+            NavigationState.SETTINGS -> navController.navigate(R.id.nav_settings)
+            NavigationState.ABOUT_US -> navController.navigate(R.id.nav_about_us)
+        }
+    }
+
 
 }
