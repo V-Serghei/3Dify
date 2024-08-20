@@ -169,7 +169,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun openCameraFragment() {
         startActivity(Intent(this, RawDepthCodelabActivity::class.java))
-        finish()
 //        navController = findNavController(R.id.nav_host_fragment_content_main)
 //        val navOptions = NavOptions.Builder()
 //            .setPopUpTo(navController.graph.findStartDestination().id, inclusive = true)

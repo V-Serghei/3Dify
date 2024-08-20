@@ -15,11 +15,11 @@
  */
 package com.app.threedify
 
+import android.content.Intent
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -87,8 +87,14 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         installRequested = false
 
         val backButton = findViewById<ImageButton>(R.id.back_button)
-        backButton.setOnClickListener { v: View? -> finish() }
+        backButton.setOnClickListener {  finish() }
 
+
+    }
+
+    private fun returnHomeMenu() {
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 
     override fun onResume() {
