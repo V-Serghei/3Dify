@@ -36,6 +36,12 @@ import kotlin.math.sqrt
  */
 object DepthData {
     const val FLOATS_PER_POINT: Int = 4 // X,Y,Z,confidence.
+    var maxNumberOfPointsToRender: Float = 20000f
+    var depthThreshold: Float = 1.5f
+    var confidenceThreshold: Float = 0.3f
+    var planeDist: Float = 0.03f
+
+
 
     fun create(frame: Frame, cameraPoseAnchor: Anchor): FloatBuffer? {
         try {
@@ -109,7 +115,7 @@ object DepthData {
         // Allocate the destination point buffer. If the number of depth pixels is larger than
         // `maxNumberOfPointsToRender` we uniformly subsample. The raw depth image may have
         // different resolutions on different devices.
-        val maxNumberOfPointsToRender = 20000f
+
         val step = ceil(sqrt((depthWidth * depthHeight / maxNumberOfPointsToRender).toDouble()))
             .toInt()
 
@@ -138,7 +144,7 @@ object DepthData {
                             + x * confidenceImagePlane.pixelStride]
                 val confidenceNormalized =
                     ((confidencePixelValue.toInt() and 0xff).toFloat()) / 255.0f
-                if (confidenceNormalized < 0.3 || depthMeters > 1.5) {
+                if (confidenceNormalized < confidenceThreshold || depthMeters > depthThreshold) {
                     // Ignores "low-confidence" pixels.
                     x += step
                     continue
@@ -196,7 +202,7 @@ object DepthData {
                 // Controls the size of objects detected.
                 // Smaller values mean smaller objects will be kept.
                 // Larger values will only allow detection of larger objects, but also helps reduce noise.
-                if (abs(distance.toDouble()) > 0.03) {
+                if (abs(distance.toDouble()) > planeDist) {
                     continue  // Keeps this point, since it's far enough away from the plane.
                 }
 

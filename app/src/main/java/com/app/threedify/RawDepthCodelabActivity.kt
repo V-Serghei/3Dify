@@ -15,6 +15,7 @@
  */
 package com.app.threedify
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
@@ -22,13 +23,13 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.SeekBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.app.arcore.common.helpers.AABB
 import com.app.arcore.common.helpers.CameraPermissionHelper
 import com.app.arcore.common.helpers.DisplayRotationHelper
 import com.app.arcore.common.helpers.FullScreenHelper
-import com.app.arcore.common.helpers.PointClusteringHelper
 import com.app.arcore.common.helpers.SnackbarHelper
 import com.app.arcore.common.helpers.TrackingStateHelper
 import com.app.arcore.common.rendering.BoxRenderer
@@ -74,6 +75,28 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     private lateinit var toggleModeButtonCamera: Button
     private var currentMode = Mode.CAMERA
 
+    private lateinit var togglePlanesFilteringButton: Button
+    private lateinit var pointsToRenderSeekBar: SeekBar
+    private lateinit var depthThresholdSeekBar: SeekBar
+    private lateinit var confidenceThresholdSeekBar: SeekBar
+    private lateinit var buttonIncreaseThreshold: SeekBar
+
+    private lateinit var placeholderButton1: Button
+    private lateinit var placeholderButton2: Button
+    private lateinit var placeholderButton3: Button
+    private lateinit var pointFixationButton: Button
+    /**********************************
+     * ********************************
+     *Button fixed point cloud
+     */
+    private val savedPoints: MutableList<FloatBuffer> = mutableListOf()
+    /**
+     *Button fixed point cloud
+     * **********************************
+     */
+    private var planesFiltringEnable = true
+
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_arcore)
@@ -90,6 +113,85 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
 
         installRequested = false
 
+
+        /**********************************
+         * ********************************
+         *Button test
+         */
+        toggleModeButtonCamera = findViewById(R.id.toggleModeButtonCamera)
+        togglePlanesFilteringButton = findViewById(R.id.togglePlanesFilteringButton)
+        pointsToRenderSeekBar = findViewById(R.id.pointsToRenderSeekBar)
+        depthThresholdSeekBar = findViewById(R.id.depthThresholdSeekBar)
+        confidenceThresholdSeekBar = findViewById(R.id.confidenceThresholdSeekBar)
+        buttonIncreaseThreshold = findViewById(R.id.increaseThresholdSeekBar)
+
+        placeholderButton1 = findViewById(R.id.testButton1)
+        placeholderButton2 = findViewById(R.id.testButton2)
+        placeholderButton3 = findViewById(R.id.testButton3)
+        pointFixationButton = findViewById(R.id.point_fixation)
+
+        toggleModeButtonCamera.setOnClickListener { toggleMode() }
+        togglePlanesFilteringButton.setOnClickListener { togglePlanesFiltering() }
+
+        /**
+         * Below are three buttons that you can use as you wish
+         *  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+         * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+         */
+        placeholderButton1.setOnClickListener{/**here will be called the method that you add here*/}
+        placeholderButton2.setOnClickListener{/**here will be called the method that you add here*/}
+        placeholderButton3.setOnClickListener{/**here will be called the method that you add here*/}
+
+        /**
+         * TODO:HOLD BUTTON NOT YET WORKING
+         * */
+        pointFixationButton.setOnClickListener{fixatePoints()}
+
+        pointsToRenderSeekBar.max = 100000
+        pointsToRenderSeekBar.progress = DepthData.maxNumberOfPointsToRender.toInt()
+        pointsToRenderSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                DepthData.maxNumberOfPointsToRender = progress.toFloat()
+                findViewById<TextView>(R.id.pointsToRenderValue).text = progress.toString()
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+
+        depthThresholdSeekBar.max = 3000
+        depthThresholdSeekBar.progress = (DepthData.depthThreshold * 1000).toInt()
+        depthThresholdSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                DepthData.depthThreshold = progress / 1000.0f
+                findViewById<TextView>(R.id.depthThresholdValue).text = (progress/1000.0f).toString()
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+
+        confidenceThresholdSeekBar.max = 100
+        confidenceThresholdSeekBar.progress = (DepthData.confidenceThreshold * 100).toInt()
+        confidenceThresholdSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                DepthData.confidenceThreshold = progress / 100.0f
+                findViewById<TextView>(R.id.confidenceThresholdValue).text = (progress/100.0f).toString()
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+        buttonIncreaseThreshold.max = 10
+        buttonIncreaseThreshold.progress = (DepthData.planeDist * 100).toInt()
+        buttonIncreaseThreshold.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                DepthData.planeDist = progress / 100.0f
+                findViewById<TextView>(R.id.increaseThresholdValue).text = (progress/100.0f).toString()
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+
+
+
         val backButton = findViewById<ImageButton>(R.id.back_button)
         backButton.setOnClickListener {  finish() }
 
@@ -98,6 +200,37 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             toggleMode()
         }
 
+        /**********************************
+         * ********************************
+         * ********************************
+         *Button test
+         */
+
+    }
+    private fun fixatePoints() {
+        session?.let { session ->
+            val frame = session.update()
+            val points: FloatBuffer = DepthData.create(frame, session.createAnchor(frame.camera.pose)) ?: return
+
+            savedPoints.add(points)
+
+            logPoints(points)
+        }
+    }
+    private fun logPoints(points: FloatBuffer) {
+        val pointCount = points.capacity() / 3
+        println("Total Points: $pointCount")
+
+        for (i in 0 until pointCount) {
+            val x = points.get(i * 3)
+            val y = points.get(i * 3 + 1)
+            val z = points.get(i * 3 + 2)
+            println("Point $i: x = $x, y = $y, z = $z")
+        }
+    }
+    private fun togglePlanesFiltering() {
+        planesFiltringEnable = !planesFiltringEnable
+        togglePlanesFilteringButton.text = if (planesFiltringEnable) "Disable Planes Filtering" else "Enable Planes Filtering"
     }
 
     private fun returnHomeMenu() {
@@ -266,14 +399,33 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             //If the raw depth mode chosen, visualize depth points
             if (currentMode == Mode.RAW_DEPTH) {
                 // Retrieve the depth data for this frame.
-                val points: FloatBuffer = DepthData.create(frame, session!!.createAnchor(camera.pose))
-                    ?: return
+                //println("Point Cloud Coordinates------------------------------------")
+                val points: FloatBuffer = DepthData.create(frame, session!!.createAnchor(camera.pose)) ?: return
+
+//                val pointCount = points.capacity() / 3
+//                println("Total Points: $pointCount")
+//
+//                for (i in 0 until pointCount) {
+//                    val x = points.get(i * 3)
+//                    val y = points.get(i * 3 + 1)
+//                    val z = points.get(i * 3 + 2)
+//                    println("Point $i: x = $x, y = $y, z = $z")
+//                }
 
                 if (messageSnackbarHelper.isShowing && points != null) {
                     messageSnackbarHelper.hide(this)
                 }
                 // Filters the depth data.
-                DepthData.filterUsingPlanes(points, session!!.getAllTrackables(Plane::class.java))
+                if (planesFiltringEnable) {
+                    DepthData.filterUsingPlanes(
+                        points,
+                        session!!.getAllTrackables(Plane::class.java)
+                    )
+                }
+                for (savedPointBuffer in savedPoints) {
+                    depthRenderer.update(savedPointBuffer)
+                    depthRenderer.draw(camera)
+                }
                 // Visualize depth points.
                 depthRenderer.update(points)
                 depthRenderer.draw(camera)

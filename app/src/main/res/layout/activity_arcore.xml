@@ -1,46 +1,227 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".RawDepthCodelabActivity">
 
-    <android.opengl.GLSurfaceView
-        android:id="@+id/surfaceview"
+    <!-- Основной слой с GLSurfaceView и другими элементами -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.opengl.GLSurfaceView
+            android:id="@+id/surfaceview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="top" />
+
+        <ImageButton
+            android:id="@+id/back_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentStart="true"
+            android:layout_margin="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/back_button_description"
+            android:src="@drawable/ic_arrow_back"
+            android:scaleType="centerInside"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:elevation="4dp"
+            android:backgroundTint="@android:color/transparent"
+            app:tint="@android:color/white" />
+
+        <Button
+            android:id="@+id/toggleModeButtonCamera"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="top|end"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/button_selector"
+            android:maxWidth="150dp"
+            android:text="@string/toggleButtonCameraText"
+            android:textColor="@color/total_white" />
+
+        <Button
+            android:id="@+id/togglePlanesFilteringButton"
+            android:layout_width="112dp"
+            android:layout_height="79dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/button_selector"
+            android:text="Toggle Planes Filtering"
+            android:textColor="@color/total_white" />
+
+        <!-- Слой с SeekBar'ами -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="70dp"
+            android:gravity="bottom">
+
+            <!-- Подпись и значение для SeekBar -->
+            <TextView
+                android:id="@+id/pointsToRenderLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:text="Points to Render:"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/pointsToRenderValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="20000"
+                android:textColor="@android:color/white" />
+
+            <SeekBar
+                android:id="@+id/pointsToRenderSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/pointsToRenderLabel"
+                android:max="100000"
+                android:progress="20000"
+                android:tooltipText="pointsToRenderSeekBar" />
+
+            <!-- Подпись и значение для SeekBar -->
+            <TextView
+                android:id="@+id/depthThresholdLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/pointsToRenderSeekBar"
+                android:layout_marginTop="12dp"
+                android:text="Depth Threshold:"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/depthThresholdValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/pointsToRenderSeekBar"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="12dp"
+                android:text="1500"
+                android:textColor="@android:color/white" />
+
+            <SeekBar
+                android:id="@+id/depthThresholdSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/depthThresholdLabel"
+                android:max="3000"
+                android:progress="1500" />
+
+            <!-- Подпись и значение для SeekBar -->
+            <TextView
+                android:id="@+id/confidenceThresholdLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/depthThresholdSeekBar"
+                android:layout_marginTop="12dp"
+                android:text="Confidence Threshold:"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/confidenceThresholdValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/depthThresholdSeekBar"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="12dp"
+                android:text="30"
+                android:textColor="@android:color/white" />
+
+            <SeekBar
+                android:id="@+id/confidenceThresholdSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/confidenceThresholdLabel"
+                android:max="100"
+                android:progress="30" />
+
+            <TextView
+                android:id="@+id/increaseThresholdLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/confidenceThresholdSeekBar"
+                android:layout_marginTop="12dp"
+                android:text="Plane Dist:"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/increaseThresholdValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/confidenceThresholdSeekBar"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="12dp"
+                android:text="3"
+                android:textColor="@android:color/white" />
+
+            <SeekBar
+                android:id="@+id/increaseThresholdSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/increaseThresholdValue"
+                android:max="10"
+                android:progress="3" />
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <!-- Независимый слой с кнопками, расположенный поверх всех остальных -->
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="top" />
+        android:layout_gravity="center"
+        android:gravity="center|end"
+        android:layout_marginBottom="120dp">
 
-    <ImageButton
-        android:id="@+id/back_button"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_alignParentStart="true"
-        android:layout_margin="16dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/back_button_description"
-        android:src="@drawable/ic_arrow_back"
-        android:scaleType="centerInside"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
-        android:elevation="4dp"
-        android:backgroundTint="@android:color/transparent"
-        app:tint="@android:color/white" />
+        <Button
+            android:id="@+id/testButton1"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="L" />
 
-    <Button
-        android:id="@+id/toggleModeButtonCamera"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="top|end"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/button_selector"
-        android:maxWidth="150dp"
-        android:text="@string/toggleButtonCameraText"
-        android:textColor="@color/total_white" />
+        <Button
+            android:id="@+id/testButton2"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/testButton1"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="10dp"
+            android:text="O" />
 
-</RelativeLayout>
+        <Button
+            android:id="@+id/testButton3"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/testButton2"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="10dp"
+            android:text="X" />
+
+        <Button
+            android:id="@+id/point_fixation"
+            android:layout_width="77dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/testButton3"
+            android:layout_marginEnd="10dp"
+            android:text="Boev" />
+    </RelativeLayout>
+
+</FrameLayout>
