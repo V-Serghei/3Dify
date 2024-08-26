@@ -39,6 +39,7 @@ import com.google.ar.core.ArCoreApk
 import com.google.ar.core.ArCoreApk.InstallStatus
 import com.google.ar.core.Config
 import com.google.ar.core.Plane
+import com.google.ar.core.Pose
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import com.google.ar.core.codelab.common.rendering.BackgroundRenderer
@@ -48,10 +49,15 @@ import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException
 import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.OutputStreamWriter
 import java.nio.FloatBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 
 /**
@@ -90,6 +96,11 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
      *Button fixed point cloud
      */
     private val savedPoints: MutableList<FloatBuffer> = mutableListOf()
+    private var currentPoints: FloatBuffer? = null
+    private var cameraPoseCurrent : Pose? = null
+    private var cameraPose:Pose ? = null
+
+
     /**
      *Button fixed point cloud
      * **********************************
@@ -208,24 +219,120 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
 
     }
     private fun fixatePoints() {
-        session?.let { session ->
-            val frame = session.update()
-            val points: FloatBuffer = DepthData.create(frame, session.createAnchor(frame.camera.pose)) ?: return
-
-            savedPoints.add(points)
-
-            logPoints(points)
+        val points = currentPoints ?: return
+        val filteredPoints = filterInvalidPoints(points)
+        if (filteredPoints.capacity() > 0) {
+            savedPoints.add(filteredPoints)
+            logPoints(filteredPoints)
+            savePointsToFile(filteredPoints)
         }
     }
-    private fun logPoints(points: FloatBuffer) {
+    private fun savePointsToFile(points: FloatBuffer) {
+        val fileName = "coordinates_data.txt"
+        val file = File(getExternalFilesDir(null), fileName)
+
+        try {
+            FileOutputStream(file, true).use { fos ->
+                OutputStreamWriter(fos).use { writer ->
+                    if (cameraPose != null) {
+                        val tx = cameraPose?.tx()
+                        val ty = cameraPose?.ty()
+                        val tz = cameraPose?.tz()
+                        writer.write("Device coordinates: x = $tx, y = $ty, z = $tz\n")
+                    }
+
+                    val pointCount = points.capacity() / 3
+                    writer.write("Total Points: $pointCount\n")
+
+                    for (i in 0 until pointCount) {
+                        val pointX = points.get(i * 3)
+                        val pointY = points.get(i * 3 + 1)
+                        val pointZ = points.get(i * 3 + 2)
+                        writer.write("Point $i: x = $pointX, y = $pointY, z = $pointZ\n")
+
+                        if (cameraPose != null) {
+                            val deviceX = cameraPose?.tx()
+                            val deviceY = cameraPose?.ty()
+                            val deviceZ = cameraPose?.tz()
+
+                            val distance = sqrt(
+                                (pointX - deviceX!!).toDouble().pow(2.0) +
+                                        (pointY - deviceY!!).toDouble().pow(2.0) +
+                                        (pointZ - deviceZ!!).toDouble().pow(2.0)
+                            )
+
+                            writer.write("Distance to point: $distance\n")
+                        }
+                    }
+
+                    writer.write("\n")
+                }
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "Error saving points to file", e)
+        }
+    }
+    private fun filterInvalidPoints(points: FloatBuffer): FloatBuffer {
+        val validPoints = mutableListOf<Float>()
         val pointCount = points.capacity() / 3
-        println("Total Points: $pointCount")
 
         for (i in 0 until pointCount) {
             val x = points.get(i * 3)
             val y = points.get(i * 3 + 1)
             val z = points.get(i * 3 + 2)
-            println("Point $i: x = $x, y = $y, z = $z")
+
+            if (x != 0.0f || y != 0.0f || z != 0.0f) {
+                validPoints.add(x)
+                validPoints.add(y)
+                validPoints.add(z)
+            }
+        }
+
+        val validPointsBuffer = FloatBuffer.allocate(validPoints.size)
+        validPointsBuffer.put(validPoints.toFloatArray())
+        validPointsBuffer.rewind()
+        return validPointsBuffer
+    }
+    private fun logPoints(points: FloatBuffer) {
+        cameraPose = cameraPoseCurrent
+       try {
+            if (cameraPose != null) {
+                val tx = cameraPose?.tx()
+                val ty = cameraPose?.ty()
+                val tz = cameraPose?.tz()
+                println("Device coordinates: x = $tx, y = $ty, z = $tz")
+            }
+
+
+            val pointCount = points.capacity() / 3
+            println("Total Points: $pointCount")
+
+            for (i in 0 until pointCount) {
+                val pointX = points.get(i * 3)
+                val pointY = points.get(i * 3 + 1)
+                val pointZ = points.get(i * 3 + 2)
+                println("Point $i: x = $pointX, y = $pointY, z = $pointZ")
+
+                if (cameraPose != null) {
+                    val deviceX = cameraPose?.tx()
+                    val deviceY = cameraPose?.ty()
+                    val deviceZ = cameraPose?.tz()
+
+
+                        val distance = sqrt(
+                            (pointX - deviceX!!).toDouble().pow(2.0) +
+                                    (pointY - deviceY!!).toDouble().pow(2.0) +
+                                    (pointZ - deviceZ!!).toDouble().pow(2.0)
+                        )
+
+                        println("Distance to point: $distance")
+                }
+
+            }
+
+        }catch (ex :NullPointerException){
+           messageSnackbarHelper.showError(this, "Cannot get phone coordinates")
+           Log.e(TAG, "Exception creating session", ex)
         }
     }
     private fun togglePlanesFiltering() {
@@ -234,6 +341,7 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     }
 
     private fun returnHomeMenu() {
+
         startActivity(Intent(this, MainActivity::class.java))
         finish()
     }
@@ -399,54 +507,45 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             //If the raw depth mode chosen, visualize depth points
             if (currentMode == Mode.RAW_DEPTH) {
                 // Retrieve the depth data for this frame.
-                //println("Point Cloud Coordinates------------------------------------")
-                val points: FloatBuffer = DepthData.create(frame, session!!.createAnchor(camera.pose)) ?: return
+                val points: FloatBuffer =
+                    DepthData.create(frame, session!!.createAnchor(camera.pose)) ?: return
 
-//                val pointCount = points.capacity() / 3
-//                println("Total Points: $pointCount")
-//
-//                for (i in 0 until pointCount) {
-//                    val x = points.get(i * 3)
-//                    val y = points.get(i * 3 + 1)
-//                    val z = points.get(i * 3 + 2)
-//                    println("Point $i: x = $x, y = $y, z = $z")
-//                }
+                if (points != null) {
+                    currentPoints = points
+                    cameraPoseCurrent = camera.pose
 
-                if (messageSnackbarHelper.isShowing && points != null) {
-                    messageSnackbarHelper.hide(this)
-                }
-                // Filters the depth data.
-                if (planesFiltringEnable) {
-                    DepthData.filterUsingPlanes(
-                        points,
-                        session!!.getAllTrackables(Plane::class.java)
-                    )
-                }
-                for (savedPointBuffer in savedPoints) {
-                    depthRenderer.update(savedPointBuffer)
+                    // Filters the depth data.
+                    if (planesFiltringEnable) {
+                        DepthData.filterUsingPlanes(
+                            points,
+                            session!!.getAllTrackables(Plane::class.java)
+                        )
+                    }
+                    for (savedPointBuffer in savedPoints) {
+                        depthRenderer.update(savedPointBuffer)
+                        depthRenderer.draw(camera)
+                    }
+                    // Visualize depth points.
+                    depthRenderer.update(points)
                     depthRenderer.draw(camera)
                 }
-                // Visualize depth points.
-                depthRenderer.update(points)
-                depthRenderer.draw(camera)
-            }
 
-            // If not tracking, show tracking failure reason instead.
-            if (camera.trackingState == TrackingState.PAUSED) {
-                messageSnackbarHelper.showMessage(
-                    this, TrackingStateHelper.getTrackingFailureReasonString(camera)
-                )
-                return
-            }
+                // If not tracking, show tracking failure reason instead.
+                if (camera.trackingState == TrackingState.PAUSED) {
+                    messageSnackbarHelper.showMessage(
+                        this, TrackingStateHelper.getTrackingFailureReasonString(camera)
+                    )
+                    return
+                }
 
-            //If you want drawn boxes uncomment
+                //If you want drawn boxes uncomment
 //            // Draw boxes around clusters of points.
 //            val clusteringHelper: PointClusteringHelper = PointClusteringHelper(points)
 //            val clusters: List<AABB> = clusteringHelper.findClusters()
 //            for (aabb in clusters) {
 //                boxRenderer.draw(aabb, camera)
 //            }
-
+            }
         } catch (t: Throwable) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t)
