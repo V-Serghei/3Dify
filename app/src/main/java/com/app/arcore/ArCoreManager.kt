@@ -5,7 +5,7 @@ import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
-import com.app.arcore.common.helpers.CameraPermissionHelper
+import com.app.threedify.helpers.CameraPermissionHelper
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Frame

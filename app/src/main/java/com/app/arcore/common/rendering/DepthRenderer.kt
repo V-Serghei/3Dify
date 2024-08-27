@@ -18,7 +18,7 @@ package com.app.arcore.common.rendering
 import android.content.Context
 import android.opengl.GLES20
 import android.opengl.Matrix
-import com.app.arcore.rawdepth.DepthData
+import com.app.threedify.rawdepth.DepthData
 import com.google.ar.core.Camera
 import java.io.IOException
 import java.nio.FloatBuffer
@@ -102,36 +102,87 @@ class DepthRenderer {
     }
 
     /** Renders the point cloud. ARCore point cloud is given in world space.  */
-    fun draw(camera: Camera) {
+    //fun draw(camera: Camera) {
+    //    val projectionMatrix = FloatArray(16)
+    //    camera.getProjectionMatrix(projectionMatrix, 0, 0.1f, 100.0f)
+    //    val viewMatrix = FloatArray(16)
+    //    camera.getViewMatrix(viewMatrix, 0)
+    //    val viewProjection = FloatArray(16)
+    //    Matrix.multiplyMM(viewProjection, 0, projectionMatrix, 0, viewMatrix, 0)
+//
+    //    ShaderUtil.checkGLError(TAG, "Draw")
+//
+    //    GLES20.glUseProgram(programName)
+    //    GLES20.glEnableVertexAttribArray(positionAttribute)
+    //    GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, arrayBuffer)
+    //    GLES20.glVertexAttribPointer(
+    //        positionAttribute,
+    //        4,
+    //        GLES20.GL_FLOAT,
+    //        false,
+    //        BYTES_PER_POINT,
+    //        0
+    //    )
+    //    GLES20.glUniformMatrix4fv(modelViewProjectionUniform, 1, false, viewProjection, 0)
+    //    GLES20.glUniform1f(pointSizeUniform, 5.0f)
+//
+    //    GLES20.glDrawArrays(GLES20.GL_POINTS, 0, numPoints)
+    //    GLES20.glDisableVertexAttribArray(positionAttribute)
+    //    GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
+//
+    //    ShaderUtil.checkGLError(TAG, "Draw complete")
+    //}
+    fun draw(camera: Camera, useIdentityMatrix: Boolean = false) {
         val projectionMatrix = FloatArray(16)
-        camera.getProjectionMatrix(projectionMatrix, 0, 0.1f, 100.0f)
         val viewMatrix = FloatArray(16)
-        camera.getViewMatrix(viewMatrix, 0)
         val viewProjection = FloatArray(16)
+
+        if (useIdentityMatrix) {
+            // Если ты хочешь использовать единичную матрицу для отладки
+            Matrix.setIdentityM(projectionMatrix, 0)
+            Matrix.setIdentityM(viewMatrix, 0)
+        } else {
+            // Получаем матрицу проекции и матрицу вида
+            camera.getProjectionMatrix(projectionMatrix, 0, 0.1f, 100.0f)
+            camera.getViewMatrix(viewMatrix, 0)
+        }
+
+        // Умножаем матрицу проекции на матрицу вида для получения итоговой матрицы
         Matrix.multiplyMM(viewProjection, 0, projectionMatrix, 0, viewMatrix, 0)
 
         ShaderUtil.checkGLError(TAG, "Draw")
 
+        // Устанавливаем используемую программу шейдеров
         GLES20.glUseProgram(programName)
+
+        // Активируем атрибут позиции
         GLES20.glEnableVertexAttribArray(positionAttribute)
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, arrayBuffer)
         GLES20.glVertexAttribPointer(
             positionAttribute,
-            4,
+            4, // Количество элементов на вершину (x, y, z, confidence)
             GLES20.GL_FLOAT,
             false,
             BYTES_PER_POINT,
             0
         )
+
+        // Передаем модельно-видовую-проекционную матрицу в шейдер
         GLES20.glUniformMatrix4fv(modelViewProjectionUniform, 1, false, viewProjection, 0)
+
+        // Устанавливаем размер точки
         GLES20.glUniform1f(pointSizeUniform, 5.0f)
 
+        // Рисуем точки
         GLES20.glDrawArrays(GLES20.GL_POINTS, 0, numPoints)
+
+        // Отключаем атрибуты и сбрасываем буфер
         GLES20.glDisableVertexAttribArray(positionAttribute)
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
 
         ShaderUtil.checkGLError(TAG, "Draw complete")
     }
+
 
     companion object {
         private val TAG: String = DepthRenderer::class.java.simpleName

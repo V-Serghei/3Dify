@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Base.Theme._3Dify"
         tools:targetApi="31">
-        <activity android:name=".SplashActivity"
+        <activity android:name=".Activity.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,13 +27,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".Activity.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Base.Theme._3Dify.NoActionBar">
         </activity>
         <activity
-            android:name=".RawDepthCodelabActivity"
+            android:name=".Activity.RawDepthCodelabActivity"
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:theme="@style/Theme.AppCompat"

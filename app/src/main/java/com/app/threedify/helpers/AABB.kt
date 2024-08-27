@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.app.arcore.common.helpers
+package com.app.threedify.helpers
 
 import kotlin.math.max
 import kotlin.math.min

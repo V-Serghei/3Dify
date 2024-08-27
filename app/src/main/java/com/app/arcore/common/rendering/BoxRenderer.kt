@@ -18,7 +18,7 @@ package com.app.arcore.common.rendering
 import android.content.Context
 import android.opengl.GLES20
 import android.opengl.Matrix
-import com.app.arcore.common.helpers.AABB
+import com.app.threedify.helpers.AABB
 import com.google.ar.core.Camera
 import java.io.IOException
 import java.nio.ByteBuffer

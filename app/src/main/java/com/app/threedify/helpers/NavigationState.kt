@@ -1,4 +1,4 @@
-package com.app.arcore.common.helpers
+package com.app.threedify.helpers
 
 enum class NavigationState {
     HOME,

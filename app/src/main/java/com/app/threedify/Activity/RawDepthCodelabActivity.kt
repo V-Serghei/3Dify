@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.app.threedify
+package com.app.threedify.Activity
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -27,14 +27,15 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.app.arcore.common.helpers.CameraPermissionHelper
-import com.app.arcore.common.helpers.DisplayRotationHelper
-import com.app.arcore.common.helpers.FullScreenHelper
-import com.app.arcore.common.helpers.SnackbarHelper
-import com.app.arcore.common.helpers.TrackingStateHelper
+import com.app.threedify.helpers.CameraPermissionHelper
+import com.app.threedify.helpers.DisplayRotationHelper
+import com.app.threedify.helpers.FullScreenHelper
+import com.app.threedify.helpers.SnackbarHelper
+import com.app.threedify.helpers.TrackingStateHelper
 import com.app.arcore.common.rendering.BoxRenderer
 import com.app.arcore.common.rendering.DepthRenderer
-import com.app.arcore.rawdepth.DepthData
+import com.app.threedify.rawdepth.DepthData
+import com.app.threedify.R
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.ArCoreApk.InstallStatus
 import com.google.ar.core.Config
@@ -153,9 +154,6 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         placeholderButton2.setOnClickListener{/**here will be called the method that you add here*/}
         placeholderButton3.setOnClickListener{/**here will be called the method that you add here*/}
 
-        /**
-         * TODO:HOLD BUTTON NOT YET WORKING
-         * */
         pointFixationButton.setOnClickListener{fixatePoints()}
 
         pointsToRenderSeekBar.max = 100000

@@ -1,4 +1,4 @@
-package com.app.threedify
+package com.app.threedify.Activity
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -24,7 +24,8 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.app.arcore.ArCoreManager
-import com.app.arcore.common.helpers.NavigationState
+import com.app.threedify.helpers.NavigationState
+import com.app.threedify.R
 import com.app.threedify.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
 import org.the3deer.util.android.AndroidURLStreamHandlerFactory
@@ -97,7 +98,13 @@ class MainActivity : AppCompatActivity() {
         val navView: NavigationView = binding.navView
 
         appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.nav_home, R.id.nav_camera, R.id.nav_gallery, R.id.nav_settings, R.id.nav_about_us),
+            setOf(
+                R.id.nav_home,
+                R.id.nav_camera,
+                R.id.nav_gallery,
+                R.id.nav_settings,
+                R.id.nav_about_us
+            ),
             drawerLayout
         )
 
@@ -174,7 +181,13 @@ class MainActivity : AppCompatActivity() {
         navController = findNavController(R.id.nav_host_fragment_content_main)
         navController.clearBackStack(R.id.nav_home)
         appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.nav_home, R.id.nav_camera, R.id.nav_gallery, R.id.nav_settings, R.id.nav_about_us),
+            setOf(
+                R.id.nav_home,
+                R.id.nav_camera,
+                R.id.nav_gallery,
+                R.id.nav_settings,
+                R.id.nav_about_us
+            ),
             drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
