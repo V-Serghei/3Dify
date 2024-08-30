@@ -23,3 +23,5 @@ rootProject.name = "3Dify"
 include ':app'
 include ':engine'
 include ':viewerapp'
+include ':pclibrary'
+include ':pclibrarycpp'
