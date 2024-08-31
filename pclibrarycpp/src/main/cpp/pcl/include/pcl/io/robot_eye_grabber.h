@@ -35,7 +35,7 @@
  *
  */
 
-#include "pcl/pcl_config.h"
+#include "../pcl_config.h"
 
 #ifndef PCL_IO_ROBOT_EYE_GRABBER_H_
 #define PCL_IO_ROBOT_EYE_GRABBER_H_

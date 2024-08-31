@@ -1,40 +1,27 @@
 cmake_minimum_required(VERSION 3.4.1)
-project(example)
+project(pclibrarycpp)
 
-include(${CMAKE_SOURCE_DIR}/cmake/conan.cmake)
+set(PCL_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/pcl/include")
+set(PCL_LIBRARY_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/pcl/lib")
 
-if("${ANDROID_ARCH_NAME}" STREQUAL "arm64")
-    conan_cmake_run(CONANFILE conanfile.txt
-            PROFILE arm64-v8a
-            BASIC_SETUP
-            UPDATE
-            BUILD missing)
-elseif("${ANDROID_ARCH_NAME}" STREQUAL "arm")
-    conan_cmake_run(CONANFILE conanfile.txt
-            PROFILE armeabi-v7a
-            BASIC_SETUP
-            UPDATE
-            BUILD missing)
-elseif("${ANDROID_ARCH_NAME}" STREQUAL "x86_64")
-    conan_cmake_run(CONANFILE conanfile.txt
-            PROFILE x86_64
-            BASIC_SETUP
-            UPDATE
-            BUILD missing)
-else()
-    message(FATAL_ERROR "${ANDROID_ARCH_NAME} not supported")
-endif()
+set(PCL_LIBRARIES
+        "${PCL_LIBRARY_DIRS}/libpcl_common.so"
+        "${PCL_LIBRARY_DIRS}/libpcl_io.so"
+        "${PCL_LIBRARY_DIRS}/libpcl_filters.so"
+        "${PCL_LIBRARY_DIRS}/libpcl_kdtree.so"
+        "${PCL_LIBRARY_DIRS}/libpcl_search.so"
+        "${PCL_LIBRARY_DIRS}/libpcl_sample_consensus.so"
+        # Добавьте другие необходимые библиотеки PCL
+)
 
-include(${CMAKE_CURRENT_BINARY_DIR}/conan_paths.cmake)
+include_directories(${PCL_INCLUDE_DIRS})
 
-find_package(pcl REQUIRED)
-
-add_library(native-lib SHARED native-lib.cpp)
+add_library(${CMAKE_PROJECT_NAME} SHARED pclibrarycpp.cpp)
 
 find_library(log-lib log)
 
-target_link_libraries(native-lib
-        PUBLIC
+target_link_libraries(${CMAKE_PROJECT_NAME}
+        android
         ${log-lib}
-        pcl::pcl
+        ${PCL_LIBRARIES}
 )

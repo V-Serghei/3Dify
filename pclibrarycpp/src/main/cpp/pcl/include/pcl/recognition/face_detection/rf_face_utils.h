@@ -8,7 +8,7 @@
 #ifndef PCL_RF_FACE_UTILS_H_
 #define PCL_RF_FACE_UTILS_H_
 
-#include "pcl/recognition/face_detection/face_common.h"
+#include "face_common.h"
 #include <pcl/ml/feature_handler.h>
 #include <pcl/ml/stats_estimator.h>
 #include <pcl/ml/branch_estimator.h>

@@ -8,8 +8,8 @@
 #ifndef FACE_DETECTOR_DATA_PROVIDER_H_
 #define FACE_DETECTOR_DATA_PROVIDER_H_
 
-#include "pcl/common/common.h"
-#include "pcl/recognition/face_detection/face_common.h"
+#include "../../common/common.h"
+#include "face_common.h"
 #include <pcl/ml/dt/decision_tree_data_provider.h>
 #include <boost/filesystem/operations.hpp>
 #include <iostream>

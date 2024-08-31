@@ -43,7 +43,7 @@
 #pragma GCC system_header
 #endif
 
-#include "pcl/pcl_macros.h"
+#include "pcl_macros.h"
 
 #include <pcl/PCLPointField.h>
 #include <boost/type_traits/remove_all_extents.hpp>

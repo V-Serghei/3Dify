@@ -42,7 +42,7 @@
 #ifndef __PCL_IO_IMAGE_GRABBER__
 #define __PCL_IO_IMAGE_GRABBER__
 
-#include "pcl/pcl_config.h"
+#include "../pcl_config.h"
 #include <pcl/io/grabber.h>
 #include <pcl/io/file_grabber.h>
 #include <pcl/common/time_trigger.h>

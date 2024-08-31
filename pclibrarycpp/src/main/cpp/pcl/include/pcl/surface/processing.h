@@ -148,7 +148,7 @@ namespace pcl
   };
 }
 
-#include "pcl/surface/impl/processing.hpp"
+#include "impl/processing.hpp"
 
 #endif  /* PCL_MESH_PROCESSING_H_ */
 
