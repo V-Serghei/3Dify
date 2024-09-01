@@ -18,6 +18,7 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import com.app.threedify.R
 import com.app.threedify.data.filesystem.FileSystemObjScanner
 import com.app.threedify.databinding.FragmentGalleryBinding
 import com.app.threedify.manager.ObjFileSearchManager
@@ -27,7 +28,7 @@ import java.io.File
 import java.util.Date
 import java.util.Locale
 
-class GalleryFragment : Fragment() {
+class GalleryFragment<LinearLayout> : Fragment() {
 
     private var _binding: FragmentGalleryBinding? = null
     private val binding get() = _binding!!
@@ -93,11 +94,17 @@ class GalleryFragment : Fragment() {
 
 
     private fun setupUI() {
-        adapter = ObjFileAdapter(emptyList())
+
+        val galleryViewModel = ViewModelProvider(this)[GalleryViewModel::class.java]
+
+        ///////////NICHITAAAAAAAAAAAAA
+        ///////////In this lambda, you can specify what you want when you press (where I make the toastik.)
+        adapter = ObjFileAdapter(emptyList()) { selectedFile ->
+            Toast.makeText(requireContext(), "NICKITA LOH Chosen file: ${selectedFile.name}", Toast.LENGTH_SHORT).show()
+        }
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 2) // Two items per row
 
-        val galleryViewModel = ViewModelProvider(this)[GalleryViewModel::class.java]
         galleryViewModel.objFiles.observe(viewLifecycleOwner) { files ->
             adapter.updateList(files)
         }

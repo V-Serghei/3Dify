@@ -10,7 +10,10 @@ import com.app.threedify.R
 
 data class ObjFile(val name: String, val path: String, val size: String, val date: String)
 
-class ObjFileAdapter(private var objFiles: List<ObjFile>) : RecyclerView.Adapter<ObjFileAdapter.ObjFileViewHolder>() {
+class ObjFileAdapter(
+    private var objFiles: List<ObjFile>,
+    private val onItemClick: (ObjFile) -> Unit
+) : RecyclerView.Adapter<ObjFileAdapter.ObjFileViewHolder>() {
 
     class ObjFileViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val fileName: TextView = itemView.findViewById(R.id.file_name)
@@ -30,6 +33,10 @@ class ObjFileAdapter(private var objFiles: List<ObjFile>) : RecyclerView.Adapter
         holder.fileIcon.setImageResource(R.drawable.file_pdf)
         holder.fileSize.text = "Size: ${objFile.size}"
         holder.fileDate.text = objFile.date
+
+        holder.itemView.setOnClickListener {
+            onItemClick(objFile)
+        }
     }
 
     override fun getItemCount() = objFiles.size
