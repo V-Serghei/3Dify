@@ -236,14 +236,15 @@ class MainActivity : AppCompatActivity() {
     //     intent.putExtra("backgroundColor", "1.0 1.0 1.0 1.0")
     //     startActivity(intent)
     // }
-        override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        val arCoreManager = ArCoreManager()
-        arCoreManager.initialize(this, findViewById(R.id.ar_scene_view), this)
-        arCoreManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
+
+//        override fun onRequestPermissionsResult(
+//        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+//    ) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//        val arCoreManager = ArCoreManager()
+//        arCoreManager.initialize(this, findViewById(R.id.ar_scene_view), this)
+//        arCoreManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//    }
 
     override fun onResume() {
         super.onResume()

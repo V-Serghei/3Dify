@@ -51,6 +51,8 @@ dependencies {
     androidTestImplementation libs.androidx.espresso.core
     implementation libs.androidx.camera.core
     implementation libs.androidx.camera.camera2
+    implementation libs.androidx.activity.ktx
+    implementation libs.androidx.fragment.ktx
 
     // Убедитесь, что проектные зависимости используют только androidx
     implementation project(':viewerapp')
