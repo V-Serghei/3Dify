@@ -1,9 +1,9 @@
 package com.app.threedify.data.filesystem
 
-import com.app.threedify.domain.objFileScanner
+import com.app.threedify.domain.IObjFileScanner
 import java.io.File
 
-class FileSystemObjScanner : objFileScanner {
+class FileSystemIObjScanner : IObjFileScanner {
     override fun scanDirectories(directories: List<File>): List<File> {
         val objFiles = mutableListOf<File>();
         directories.forEach { directory ->
