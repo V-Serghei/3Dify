@@ -11,7 +11,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/engine" />
-            <option value="$PROJECT_DIR$/pclibrarycpp" />
+            <option value="$PROJECT_DIR$/nativelib" />
             <option value="$PROJECT_DIR$/viewerapp" />
           </set>
         </option>

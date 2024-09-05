@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.app.threedify.databinding.FragmentGalleryBinding
+import com.example.nativelib.NativeLib
 
 class GalleryFragment : Fragment() {
 
@@ -27,13 +28,24 @@ class GalleryFragment : Fragment() {
 
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
         val root: View = binding.root
-
         val textView: TextView = binding.textGallery
         galleryViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
+        val nativeLib = NativeLib()
+        val jniMessage = nativeLib.stringFromJNI()
+        textView.text = "JNI Message: $jniMessage"
+
+        // Вызываем метод processPointCloud()
+        try {
+            nativeLib.processPointCloud()
+            textView.append("\nPoint Cloud Processing: Success")
+        } catch (e: Exception) {
+            textView.append("\nPoint Cloud Processing: Failed\n${e.message}")
+        }
         return root
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

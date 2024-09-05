@@ -1,6 +1,0 @@
-[requires]
-pcl/1.9.1@bashbug/stable
-
-[generators]
-cmake_paths
-cmake_find_package
