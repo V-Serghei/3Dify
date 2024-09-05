@@ -27,6 +27,8 @@ import com.app.arcore.ArCoreManager
 import com.app.threedify.helpers.NavigationState
 import com.app.threedify.R
 import com.app.threedify.databinding.ActivityMainBinding
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
 import com.google.android.material.navigation.NavigationView
 import org.the3deer.util.android.AndroidURLStreamHandlerFactory
 import java.net.URL
@@ -85,6 +87,10 @@ class MainActivity : AppCompatActivity() {
 
         // Optional: Uncomment to initialize 3D viewer
         // initialize3DViewer()
+        if (!Python.isStarted()) {
+            Python.start(AndroidPlatform(this))
+        }
+        val python = Python.getInstance()
     }
 
 
