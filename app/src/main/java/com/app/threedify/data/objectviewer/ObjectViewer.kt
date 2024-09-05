@@ -12,7 +12,7 @@ class ObjectViewer(
     private val file:File): IObjFileViewer {
 
     init {
-        //Should exist in every class which uses activities from VIEWERAPP
+        ///Should exist in every class which uses activities from VIEWERAPP
         System.setProperty("java.protocol.handler.pkgs", "org.the3deer.util.android")
         //URL.setURLStreamHandlerFactory(AndroidURLStreamHandlerFactory())
     }
