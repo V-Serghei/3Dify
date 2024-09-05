@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         init {
             System.setProperty("java.protocol.handler.pkgs", "org.the3deer.util.android")
-            URL.setURLStreamHandlerFactory(AndroidURLStreamHandlerFactory())
+                //URL.setURLStreamHandlerFactory(AndroidURLStreamHandlerFactory())
         }
     }
     /////////////////////////////////////////////////////////////////

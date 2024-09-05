@@ -9,7 +9,7 @@ import org.the3deer.util.android.AndroidURLStreamHandlerFactory
 import java.io.File
 import java.net.URL
 
-class ObjectViewer private constructor(
+class ObjectViewer(
     private val context: Context,
     private val file:File): IObjFileViewer {
 
