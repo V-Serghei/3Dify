@@ -5,9 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import com.app.threedify.domain.IObjFileViewer
 import org.the3deer.app.model3D.view.ModelActivity
-import org.the3deer.util.android.AndroidURLStreamHandlerFactory
 import java.io.File
-import java.net.URL
 
 class ObjectViewer(
     private val context: Context,
@@ -16,7 +14,7 @@ class ObjectViewer(
     init {
         //Should exist in every class which uses activities from VIEWERAPP
         System.setProperty("java.protocol.handler.pkgs", "org.the3deer.util.android")
-        URL.setURLStreamHandlerFactory(AndroidURLStreamHandlerFactory())
+        //URL.setURLStreamHandlerFactory(AndroidURLStreamHandlerFactory())
     }
 
     //Call for 3D viewer window

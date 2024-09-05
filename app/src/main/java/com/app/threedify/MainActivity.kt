@@ -35,10 +35,11 @@ class MainActivity : AppCompatActivity() {
 
     /////////////////////////////////////////////////////////////////
     //Should exist in every class which uses activities from VIEWERAPP
+    //!!!StreamHandlerFactory can be declared only once per program!!!
     companion object {
         init {
             System.setProperty("java.protocol.handler.pkgs", "org.the3deer.util.android")
-                //URL.setURLStreamHandlerFactory(AndroidURLStreamHandlerFactory())
+            URL.setURLStreamHandlerFactory(AndroidURLStreamHandlerFactory())
         }
     }
     /////////////////////////////////////////////////////////////////

@@ -1,6 +1,5 @@
 package com.app.threedify.ui.gallery
 
-import android.content.Context
 import android.content.Intent
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
@@ -25,6 +24,7 @@ import com.app.threedify.databinding.FragmentGalleryBinding
 import com.app.threedify.manager.ObjFileSearchManager
 import com.app.threedify.ui.gallery.helpers.ObjFile
 import com.app.threedify.ui.gallery.helpers.ObjFileAdapter
+import org.the3deer.app.model3D.view.ModelActivity
 import java.io.File
 import java.util.Date
 import java.util.Locale
@@ -102,7 +102,9 @@ class GalleryFragment<LinearLayout> : Fragment() {
         ///////////In this lambda, you can specify what you want when you press (where I make the toastik.)
         adapter = ObjFileAdapter(emptyList()) { selectedFile ->
             Toast.makeText(requireContext(), " Chosen file: ${selectedFile.name}", Toast.LENGTH_SHORT).show()
-            ObjectViewer.view(requireContext(), File(selectedFile.path))
+            initialize3DViewer(selectedFile.path)
+            //alternative initializing variant
+            //ObjectViewer.view(requireContext(), File(selectedFile.path))
         }
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 2) // Two items per row
@@ -151,6 +153,16 @@ class GalleryFragment<LinearLayout> : Fragment() {
         } else {
             "$sizeInKB KB"
         }
+    }
+    private fun initialize3DViewer(filePath: String) {
+        val fileUri = Uri.fromFile(File(filePath))
+
+        val intent = Intent(requireContext(), ModelActivity::class.java)
+        intent.putExtra("uri", fileUri.toString())
+        intent.putExtra("type", "-1")
+        intent.putExtra("immersiveMode", "false")
+        intent.putExtra("backgroundColor", "1.0 1.0 1.0 1.0")
+        startActivity(intent)
     }
 
     fun getFileCreationDate(file: File): String {
