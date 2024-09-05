@@ -27,6 +27,7 @@ import com.app.arcore.ArCoreManager
 import com.app.arcore.common.helpers.NavigationState
 import com.app.threedify.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
+import org.the3deer.app.model3D.view.ModelActivity
 import org.the3deer.util.android.AndroidURLStreamHandlerFactory
 import java.net.URL
 
@@ -227,15 +228,6 @@ class MainActivity : AppCompatActivity() {
     ////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////
 
-    // Optional: Uncomment to initialize 3D viewer
-    // private fun initialize3DViewer() {
-    //     val intent = Intent(this, ModelActivity::class.java)
-    //     intent.putExtra("uri", "android://org.andresoviedo.dddmodel2/assets/models/cube.obj")
-    //     intent.putExtra("type", "-1")
-    //     intent.putExtra("immersiveMode", "false")
-    //     intent.putExtra("backgroundColor", "1.0 1.0 1.0 1.0")
-    //     startActivity(intent)
-    // }
 
 //        override fun onRequestPermissionsResult(
 //        requestCode: Int, permissions: Array<String>, grantResults: IntArray
