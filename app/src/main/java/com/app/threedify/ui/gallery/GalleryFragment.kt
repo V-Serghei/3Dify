@@ -1,5 +1,6 @@
 package com.app.threedify.ui.gallery
 
+import android.content.Context
 import android.content.Intent
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
@@ -18,23 +19,22 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
-import com.app.threedify.data.filesystem.FileSystemIObjScanner
-import com.app.threedify.data.objectviewer.ObjectViewer
+import com.app.threedify.data.filesystem.FileSystemObjScanner
 import com.app.threedify.databinding.FragmentGalleryBinding
 import com.app.threedify.manager.ObjFileSearchManager
 import com.app.threedify.ui.gallery.helpers.ObjFile
 import com.app.threedify.ui.gallery.helpers.ObjFileAdapter
 import org.the3deer.app.model3D.view.ModelActivity
 import java.io.File
+import java.nio.file.Path
 import java.util.Date
 import java.util.Locale
 
 class GalleryFragment<LinearLayout> : Fragment() {
-
     private var _binding: FragmentGalleryBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: ObjFileAdapter
-
+    private val sharedPreferences = requireContext().getSharedPreferences("gallery_preferences", Context.MODE_PRIVATE) // for storing settings
     @RequiresApi(Build.VERSION_CODES.R)
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -131,8 +131,9 @@ class GalleryFragment<LinearLayout> : Fragment() {
 
     private fun scanObjFiles() {
         val galleryViewModel = ViewModelProvider(this)[GalleryViewModel::class.java]
-        val objFileScanner = FileSystemIObjScanner()
+        val objFileScanner = FileSystemObjScanner()
         val fileSearchManager = ObjFileSearchManager(objFileScanner)
+        val subDirs = fileSearchManager.getSubDir(File("/storage/emulated/0"))
         val directories = listOf(
             File("/storage/emulated/0")
         )
@@ -142,6 +143,18 @@ class GalleryFragment<LinearLayout> : Fragment() {
             ObjFile(it.name, it.path, size, date)
         }
         galleryViewModel.updateObjFiles(objFiles)
+    }
+
+
+    private fun editScannerPath(newPath: File){
+        val editor = sharedPreferences.edit()
+        editor.putString("searchPath", newPath.path)
+        editor.apply()
+    }
+
+
+    private fun getScannerPath(): File {
+        return File(sharedPreferences.getString("searchPath", "/storage/emulated/0")?: "/storage/emulated/0")
     }
 
     fun getFileSize(file: File): String {

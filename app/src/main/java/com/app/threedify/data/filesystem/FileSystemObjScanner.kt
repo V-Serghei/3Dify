@@ -3,7 +3,7 @@ package com.app.threedify.data.filesystem
 import com.app.threedify.domain.IObjFileScanner
 import java.io.File
 
-class FileSystemIObjScanner : IObjFileScanner {
+class FileSystemObjScanner : IObjFileScanner {
     override fun scanDirectories(directories: List<File>): List<File> {
         val objFiles = mutableListOf<File>();
         directories.forEach { directory ->
@@ -16,6 +16,15 @@ class FileSystemIObjScanner : IObjFileScanner {
             }
         }
         return objFiles;
+    }
+    override fun getSubDirectories(targetDirectory: File) :List<File>{
+        val directories = mutableListOf<File>()
+        targetDirectory.walkTopDown().forEach { directory ->
+            if(directory.isDirectory){
+                directories.add(directory)
+            }
+        }
+        return directories
     }
 }
 
