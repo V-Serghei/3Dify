@@ -9,7 +9,7 @@ set(PCL_ROOT "pclib/jniLibs/arm64-v8a/pcl")
 include_directories(${BOOST_ROOT}/include ${EIGEN_ROOT}/include/eigen3 ${FLANN_ROOT}/include ${LZ4_ROOT}/include ${PCL_ROOT}/include)
 link_directories(${BOOST_ROOT}/lib ${FLANN_ROOT}/lib ${LZ4_ROOT}/lib ${PCL_ROOT}/lib)
 add_library(${CMAKE_PROJECT_NAME} SHARED
-        pclibrary.cpp)
+        nativelib.cpp)
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
         -lpcl_common
