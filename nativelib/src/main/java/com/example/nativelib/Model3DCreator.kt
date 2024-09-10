@@ -1,11 +1,11 @@
 package com.example.nativelib
 
-class NativeLib {
-
-    external fun stringFromJNI(): String
+class Model3DCreator {
     companion object {
         init {
             System.loadLibrary("nativelib")
         }
     }
+    external fun processPointCloud(): String
+
 }
