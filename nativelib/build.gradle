@@ -1,7 +1,135 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.vanniktech.maven.publish") version "0.28.0"
+
 }
+
+tasks.register('mergeArchiveParts') {
+    def archiveDir = file('src/main/cpp/pclib/jniLibs/arm64-v8a/pcl/lib')
+
+    doLast {
+        def zipFiles = [
+                'libpcl_tracking.zip',
+                'libpcl_surface.zip',
+                'libpcl_common.zip',
+                'libpcl_features.zip',
+                'libpcl_filters.zip',
+                'libpcl_io.zip',
+                'libpcl_io_ply.zip',
+                'libpcl_kdtree.zip',
+                'libpcl_keypoints.zip',
+                'libpcl_ml.zip',
+                'libpcl_octree.zip',
+                'libpcl_recognition.zip',
+                'libpcl_registration.zip',
+                'libpcl_sample_consensus.zip',
+                'libpcl_search.zip',
+                'libpcl_segmentation.zip',
+                'libpcl_stereo.zip'
+        ]
+
+        zipFiles.each { archiveName ->
+            def outputFile = file("${archiveDir}/${archiveName}")
+
+            def partsPattern = "${archiveName}.*"
+            def parts = fileTree(dir: archiveDir, includes: [partsPattern])
+            boolean allPartsExist = parts.files.size() > 0
+
+            if (allPartsExist) {
+                println "Merging parts for ${archiveName}..."
+
+                if (!outputFile.exists()) {
+                    def outputStream = new FileOutputStream(outputFile, true)
+
+                    parts.each { part ->
+                        outputStream.write(part.bytes)
+                        println "Added: ${part.name}"
+                    }
+
+                    outputStream.close()
+                    println "Merge completed, file: $outputFile"
+                } else {
+                    println "File ${archiveName} already exists, skipping merge."
+                }
+            } else {
+                println "Not all parts for ${archiveName} are available, skipping merge."
+            }
+        }
+    }
+}
+
+
+tasks.register('extractArchives') {
+    def archiveDir = file('src/main/cpp/pclib/jniLibs/arm64-v8a/pcl/lib')
+
+    doLast {
+        def archives = [
+                'libpcl_tracking.zip',
+                'libpcl_surface.zip',
+                'libpcl_common.zip',
+                'libpcl_features.zip',
+                'libpcl_filters.zip',
+                'libpcl_io.zip',
+                'libpcl_io_ply.zip',
+                'libpcl_kdtree.zip',
+                'libpcl_keypoints.zip',
+                'libpcl_ml.zip',
+                'libpcl_octree.zip',
+                'libpcl_recognition.zip',
+                'libpcl_registration.zip',
+                'libpcl_sample_consensus.zip',
+                'libpcl_search.zip',
+                'libpcl_segmentation.zip',
+                'libpcl_stereo.zip'
+        ]
+
+        archives.each { archiveName ->
+            def archiveFile = file("${archiveDir}/${archiveName}")
+
+            if (archiveFile.exists()) {
+                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                    exec {
+                        commandLine 'powershell', '-command', "& {Expand-Archive -Path '${archiveFile}' -DestinationPath '${archiveDir}' -Force}"
+                    }
+                } else {
+                    exec {
+                        commandLine 'bash', '-c', "unzip ${archiveFile} -d ${archiveDir}"
+                    }
+                }
+
+                println "Archive ${archiveName} successfully unpacked!"
+
+                if (archiveFile.exists()) {
+                    archiveFile.delete()
+                    println "Deleted archive ${archiveName}"
+                }
+
+                def parts = fileTree(dir: archiveDir, includes: ["${archiveName}.*"])
+                parts.each { part ->
+                    if (part.exists()) {
+                        part.delete()
+                        println "Deleted part of archive ${part.name}"
+                    }
+                }
+            } else {
+                println "Archive ${archiveName} does not exist, skipping extraction."
+            }
+        }
+    }
+}
+
+extractArchives.dependsOn mergeArchiveParts
+
+preBuild.dependsOn extractArchives
+
+
+
+
+
+
 
 android {
     namespace 'com.example.nativelib'
@@ -9,7 +137,9 @@ android {
 
     defaultConfig {
         minSdk 29
-
+        targetSdkVersion 33
+        versionCode 1
+        versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
         externalNativeBuild {
@@ -20,7 +150,6 @@ android {
         ndk {
             abiFilters "arm64-v8a"
         }
-
     }
 
     buildTypes {
@@ -29,23 +158,70 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
             version "3.22.1"
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+
+
+
 }
 
-dependencies {
 
+
+//publishing {
+//    repositories {
+//        maven {
+//            name = "GitHubPackages"
+//            url = uri("https://maven.pkg.github.com/V-Serghei/pcl-binaries-android-armv8")
+//            credentials {
+//                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+//                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+//            }
+//        }
+//    }
+//    publications {
+//        gpr(MavenPublication) {
+//            groupId = 'org.group'
+//            artifactId = 'artifact'
+//            version = '0.1'
+//
+//            file('main/cpp/pclib/jniLibs/arm64-v8a/boost/lib/').eachFile { file ->
+//                if (file.name.endsWith('.a')) {
+//                    artifact(file) {
+//                        extension = 'a'
+//                        classifier = file.name.replace('.a', '')
+//                    }
+//                }
+//            }
+//
+//            artifact(tasks.create(name: 'zipboostheader', type: Zip) {
+//                from 'maincpp/pclib/jniLibs/arm64-v8a/boost/include/'
+//                archiveFileName = 'zipBoostHeader.zip'
+//            }.archiveFile) {
+//                extension = 'zip'
+//                classifier = 'headers'
+//            }
+//        }
+//    }
+//
+//}
+
+
+dependencies {
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material
