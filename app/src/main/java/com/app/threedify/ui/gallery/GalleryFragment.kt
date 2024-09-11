@@ -1,6 +1,9 @@
 package com.app.threedify.ui.gallery
 
+import android.content.ContentValues
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,15 +11,12 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.app.threedify.databinding.FragmentGalleryBinding
-import com.example.nativelib.NativeLib
 import com.example.nativelib.Model3DCreator
+import java.io.OutputStream
 
 class GalleryFragment : Fragment() {
 
     private var _binding: FragmentGalleryBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -33,20 +33,61 @@ class GalleryFragment : Fragment() {
         galleryViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
-        val nativeLib = NativeLib()
+
         val model3DCreator = Model3DCreator()
-        val jniMessage = nativeLib.stringFromJNI()
-        textView.text = "JNI Message: $jniMessage"
+        val pointArrays = arrayOf(
+            floatArrayOf(0f, 0f, 0f, 1f, 0f, 0f, 1f, 1f, 0f, 0f, 1f, 0f),
+            floatArrayOf(0f, 0f, 0f, 1f, 0f, 0f, 0.5f, 1f, 1f),
+            floatArrayOf(1f, 0f, 0f, 1f, 1f, 0f, 0.5f, 1f, 1f),
+            floatArrayOf(1f, 1f, 0f, 0f, 1f, 0f, 0.5f, 1f, 1f),
+            floatArrayOf(0f, 0f, 0f, 0f, 1f, 0f, 0.5f, 1f, 1f)
+        )
+
 
         try {
-            model3DCreator.processPointCloud()
-            textView.append("\nPoint Cloud Processing: Success")
+            val objData = model3DCreator.processPointCloud(pointArrays)
+            saveModelToFile(objData, "output_model.obj")
+            textView.text = "1111111111111111111111111111111111111" +
+                    "1111111111111111111111111111" +
+                    "1111111111111111111" +
+                    "11" +
+                    "1" +
+                    "1" +
+                    "1" +
+                    "1" +
+                    "1" +
+                    "1" +
+                    "" +
+                    "1Point Cloud Processing and Saving: Success"
         } catch (e: Exception) {
-            textView.append("\nPoint Cloud Processing: Failed\n${e.message}")
+            textView.append("\n22222222222222222222222222222222222222Point Cloud Processing: Failed\n${e.message}")
         }
+
         return root
     }
 
+    // Функция для сохранения OBJ-файла в директорию загрузок
+    private fun saveModelToFile(objData: String, filename: String) {
+        val resolver = requireContext().contentResolver
+        val values = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, "$filename.obj")
+            put(MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+        }
+
+        // Вставка в MediaStore для создания записи
+        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+        uri?.let {
+            resolver.openOutputStream(it)?.use { outputStream ->
+                writeDataToFile(outputStream, objData) // Запись данных в файл
+            }
+        }
+    }
+
+    // Запись данных OBJ в поток вывода
+    private fun writeDataToFile(outputStream: OutputStream, data: String) {
+        outputStream.write(data.toByteArray())
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

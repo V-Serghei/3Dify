@@ -35,7 +35,7 @@
 #include <cstdlib>
 #include <cstddef>
 #include <vector>
-
+#include <random>
 #include "flann/general.h"
 
 namespace flann
@@ -110,14 +110,15 @@ public:
      */
     void init(int n)
     {
-        static RandomGenerator generator;
         // create and initialize an array of size n
         vals_.resize(n);
         size_ = n;
         for (int i = 0; i < size_; ++i) vals_[i] = i;
 
         // shuffle the elements in the array
-        std::random_shuffle(vals_.begin(), vals_.end(), generator);
+        std::default_random_engine generator;
+        std::shuffle(vals_.begin(), vals_.end(), generator);
+
 
         counter_ = 0;
     }

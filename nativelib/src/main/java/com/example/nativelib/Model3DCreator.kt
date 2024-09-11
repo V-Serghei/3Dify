@@ -6,6 +6,6 @@ class Model3DCreator {
             System.loadLibrary("nativelib")
         }
     }
-    external fun processPointCloud(): String
 
+    external fun processPointCloud(pointArrays: Array<FloatArray>): String
 }

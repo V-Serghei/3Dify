@@ -11,7 +11,14 @@ link_directories(${BOOST_ROOT}/lib ${FLANN_ROOT}/lib ${LZ4_ROOT}/lib ${PCL_ROOT}
 add_library(${CMAKE_PROJECT_NAME} SHARED
         nativelib.cpp
         PointCloudTo3DModel.cpp)
+find_package(OpenMP REQUIRED)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
 
+if (OpenMP_CXX_FOUND)
+    target_link_libraries(nativelib OpenMP::OpenMP_CXX)
+endif ()
+target_link_libraries(nativelib -fopenmp)
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
         -lpcl_common
@@ -31,6 +38,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         -lpcl_surface
         -lpcl_octree
         -lpcl_stereo
+        -lflann_cpp_s
+        -llz4
         -lboost_system
         -lboost_filesystem
         -lboost_thread
@@ -64,4 +73,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         -llog
         -latomic
         -lm
+        -llz4
 )
+
