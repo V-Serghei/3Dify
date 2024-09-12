@@ -10,11 +10,16 @@
 
 class PointCloudTo3DModel {
 public:
-    static std::string processPointCloud(const std::vector<std::vector<float>>& pointArrays);
-};
+    static bool processPointCloud(const std::vector<std::vector<float>>& pointArrays, const std::string& filePath) ;
+
+
+    };
 
 extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_example_nativelib_Model3DCreator_processPointCloud(JNIEnv *env, jobject thiz, jobjectArray pointArrays);
+JNIEXPORT jboolean JNICALL
+Java_com_example_nativelib_Model3DCreator_processPointCloudToUri(JNIEnv *env, jobject thiz,
+                                                                 jobjectArray point_arrays, jint fileDescriptor);
+
+
 
 #endif // POINTCLOUDTO3DMODEL_H

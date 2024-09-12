@@ -45,8 +45,6 @@ class GalleryFragment : Fragment() {
 
 
         try {
-            val objData = model3DCreator.processPointCloud(pointArrays)
-            saveModelToFile(objData, "output_model.obj")
             textView.text = "1111111111111111111111111111111111111" +
                     "1111111111111111111111111111" +
                     "1111111111111111111" +
@@ -66,7 +64,6 @@ class GalleryFragment : Fragment() {
         return root
     }
 
-    // Функция для сохранения OBJ-файла в директорию загрузок
     private fun saveModelToFile(objData: String, filename: String) {
         val resolver = requireContext().contentResolver
         val values = ContentValues().apply {
@@ -75,16 +72,14 @@ class GalleryFragment : Fragment() {
             put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
         }
 
-        // Вставка в MediaStore для создания записи
         val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
         uri?.let {
             resolver.openOutputStream(it)?.use { outputStream ->
-                writeDataToFile(outputStream, objData) // Запись данных в файл
+                writeDataToFile(outputStream, objData)
             }
         }
     }
 
-    // Запись данных OBJ в поток вывода
     private fun writeDataToFile(outputStream: OutputStream, data: String) {
         outputStream.write(data.toByteArray())
     }

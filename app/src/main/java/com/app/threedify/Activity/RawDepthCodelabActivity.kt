@@ -16,10 +16,14 @@
 package com.app.threedify.Activity
 
 import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.content.Intent
+import android.net.Uri
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageButton
@@ -36,6 +40,7 @@ import com.app.arcore.common.rendering.BoxRenderer
 import com.app.arcore.common.rendering.DepthRenderer
 import com.app.threedify.rawdepth.DepthData
 import com.app.threedify.R
+import com.example.nativelib.Model3DCreator
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.ArCoreApk.InstallStatus
 import com.google.ar.core.Config
@@ -150,8 +155,11 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
          *  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
          * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
          */
-        placeholderButton1.setOnClickListener{/**here will be called the method that you add here*/}
-        placeholderButton2.setOnClickListener{/**here will be called the method that you add here*/}
+        placeholderButton1.setOnClickListener{save3DModel() }
+        placeholderButton2.setOnClickListener{
+
+            val fileName = "model_save.obj"
+            saveModelToUri(fileName) }
         placeholderButton3.setOnClickListener{/**here will be called the method that you add here*/}
 
         pointFixationButton.setOnClickListener{fixatePoints()}
@@ -216,6 +224,230 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
          */
 
     }
+
+    /**
+     * Point cloud save obj test
+     *  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+     * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+     */
+//    private val pointArrays = arrayOf(
+//        floatArrayOf(
+//            // Нижняя грань (Z = 0)
+//            0.0f, 0.0f, 0.0f,   // Точка (0, 0, 0)
+//            1.0f, 0.0f, 0.0f,   // Точка (1, 0, 0)
+//            2.0f, 0.0f, 0.0f,   // Точка (2, 0, 0)
+//            2.0f, 1.0f, 0.0f,   // Точка (2, 1, 0)
+//            1.0f, 1.0f, 0.0f,   // Точка (1, 1, 0)
+//            0.0f, 1.0f, 0.0f,   // Точка (0, 1, 0)
+//            0.0f, 2.0f, 0.0f,   // Точка (0, 2, 0)
+//            1.0f, 2.0f, 0.0f,   // Точка (1, 2, 0)
+//            2.0f, 2.0f, 0.0f,   // Точка (2, 2, 0)
+//
+//            // Верхняя грань (Z = 1)
+//            0.0f, 0.0f, 1.0f,   // Точка (0, 0, 1)
+//            1.0f, 0.0f, 1.0f,   // Точка (1, 0, 1)
+//            2.0f, 0.0f, 1.0f,   // Точка (2, 0, 1)
+//            2.0f, 1.0f, 1.0f,   // Точка (2, 1, 1)
+//            1.0f, 1.0f, 1.0f,   // Точка (1, 1, 1)
+//            0.0f, 1.0f, 1.0f,   // Точка (0, 1, 1)
+//            0.0f, 2.0f, 1.0f,   // Точка (0, 2, 1)
+//            1.0f, 2.0f, 1.0f,   // Точка (1, 2, 1)
+//            2.0f, 2.0f, 1.0f    // Точка (2, 2, 1)
+//        )
+//    )
+//    private val pointArrays = arrayOf(
+//        // Грань 1 (Фронтальная)
+//        floatArrayOf(
+//            1f, 1f, -1f,  // Вершина 1
+//            -1f, 1f, -1f, // Вершина 2
+//            -1f, -1f, -1f, // Вершина 3
+//            1f, -1f, -1f  // Вершина 4
+//        ),
+//        // Грань 2 (Задняя)
+//        floatArrayOf(
+//            1f, 1f, 1f,   // Вершина 1
+//            1f, -1f, 1f,  // Вершина 2
+//            -1f, -1f, 1f, // Вершина 3
+//            -1f, 1f, 1f   // Вершина 4
+//        ),
+//        // Грань 3 (Правая)
+//        floatArrayOf(
+//            1f, 1f, 1f,   // Вершина 1
+//            1f, -1f, 1f,  // Вершина 2
+//            1f, -1f, -1f, // Вершина 3
+//            1f, 1f, -1f   // Вершина 4
+//        ),
+//        // Грань 4 (Левая)
+//        floatArrayOf(
+//            -1f, 1f, 1f,  // Вершина 1
+//            -1f, 1f, -1f, // Вершина 2
+//            -1f, -1f, -1f, // Вершина 3
+//            -1f, -1f, 1f   // Вершина 4
+//        ),
+//        // Грань 5 (Верхняя)
+//        floatArrayOf(
+//            1f, 1f, 1f,   // Вершина 1
+//            1f, 1f, -1f,  // Вершина 2
+//            -1f, 1f, -1f, // Вершина 3
+//            -1f, 1f, 1f   // Вершина 4
+//        ),
+//        // Грань 6 (Нижняя)
+//        floatArrayOf(
+//            1f, -1f, 1f,  // Вершина 1
+//            1f, -1f, -1f, // Вершина 2
+//            -1f, -1f, -1f, // Вершина 3
+//            -1f, -1f, 1f   // Вершина 4
+//        )
+//    )
+
+    private val pointArrays = arrayOf(
+        // Грань 1 (Фронтальная)
+        generateFacePoints(1f, 1f, -1f, -1f, -1f, 1f, 10),  // Добавляем 10 точек на каждую ось
+
+        // Грань 2 (Задняя)
+        generateFacePoints(1f, 1f, 1f, 1f, -1f, 1f, 10),   // Добавляем 10 точек на каждую ось
+
+        // Грань 3 (Правая)
+        generateFacePoints(1f, 1f, 1f, 1f, -1f, -1f, 10),  // Добавляем 10 точек на каждую ось
+
+        // Грань 4 (Левая)
+        generateFacePoints(-1f, 1f, 1f, -1f, -1f, -1f, 10), // Добавляем 10 точек на каждую ось
+
+        // Грань 5 (Верхняя)
+        generateFacePoints(1f, 1f, 1f, -1f, 1f, -1f, 10),   // Добавляем 10 точек на каждую ось
+
+        // Грань 6 (Нижняя)
+        generateFacePoints(1f, -1f, 1f, -1f, -1f, -1f, 10)  // Добавляем 10 точек на каждую ось
+    )
+
+    // Функция для генерации точек на одной грани
+    private fun generateFacePoints(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float, numPoints: Int): FloatArray {
+        val points = mutableListOf<Float>()
+        val stepX = (x2 - x1) / (numPoints - 1)
+        val stepY = (y2 - y1) / (numPoints - 1)
+
+        for (i in 0 until numPoints) {
+            for (j in 0 until numPoints) {
+                val x = x1 + i * stepX
+                val y = y1 + j * stepY
+                points.add(x)
+                points.add(y)
+                points.add(z1)
+            }
+        }
+
+        return points.toFloatArray()
+    }
+
+
+    private val model3DCreator = Model3DCreator()
+
+    private fun save3DModel() {
+        val fileName = "my3DModel.obj"
+
+        //val savedFilePath = model3DCreator.processPointCloud(pointArrays, fileName)
+
+        //Log.d("JNI", "3D модель сохранена по пути: $savedFilePath")
+    }
+//    private fun saveModelToFile(fileName: String) {
+//        val resolver = application.contentResolver
+//        val values = ContentValues().apply {
+//            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+//            put(MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream")
+//            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+//        }
+//
+//        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+//        Log.d("JNI", "URI: $uri")
+//        uri?.let {
+//            resolver.openOutputStream(uri)?.use { outputStream ->
+//                val result = model3DCreator.processPointCloud(pointArrays)
+//                Log.d("JNI", "3D модель сохранена результатом: $result")
+//            } ?: run {
+//                Log.e("JNI", "Не удалось открыть OutputStream для URI.")
+//            }
+//        } ?: run {
+//            Log.e("JNI", "Не удалось создать URI для сохранения файла.")
+//        }
+//    }
+
+//    private fun createModelFile(fileName: String): String? {
+//        val resolver = application.contentResolver
+//        val values = ContentValues().apply {
+//            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+//            put(MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream")
+//            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+//        }
+//
+//        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+//        Log.d("JNI", "URI: $uri")
+//        uri?.let {
+//            val filePath = uri.path
+//            Log.d("JNI", "File path: $filePath")
+//            return filePath
+//        } ?: run {
+//            Log.e("JNI", "Не удалось создать URI для сохранения файла.")
+//            return null
+//        }
+//    }
+//    private fun saveModelToFile(fileName: String) {
+//        val filePath = createModelFile(fileName)
+//        if (filePath != null) {
+//            val result = model3DCreator.processPointCloud(pointArrays, filePath)
+//            Log.d("JNI", "3D модель сохранена результатом: $result")
+//        } else {
+//            Log.e("JNI", "Не удалось создать файл для сохранения модели.")
+//        }
+//    }
+private fun createModelUri(fileName: String): Uri? {
+    val resolver = application.contentResolver
+    val values = ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+        put(MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream")
+        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+    }
+
+    return resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)?.also {
+        Log.d("JNI", "URI: $it")
+    } ?: run {
+        Log.e("JNI", "Не удалось создать URI для сохранения файла.")
+        null
+    }
+}
+
+    private fun saveModelToUri(fileName: String) {
+        val uri = createModelUri(fileName)
+        if (uri != null) {
+            val parcelFileDescriptor = contentResolver.openFileDescriptor(uri, "w")
+            parcelFileDescriptor?.let {
+                val result = model3DCreator.processPointCloudToUri(pointArrays, it.detachFd())
+                Log.d("JNI", "3D модель сохранена результатом: $result")
+            } ?: run {
+                Log.e("JNI", "Не удалось получить дескриптор файла для сохранения модели.")
+            }
+        } else {
+            Log.e("JNI", "Не удалось создать URI для сохранения модели.")
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /**********************************
+     * ********************************
+     * ********************************
+     *Point cloud save obj test
+     */
+
+
+
     private fun fixatePoints() {
         val points = currentPoints ?: return
         val filteredPoints = filterInvalidPoints(points)

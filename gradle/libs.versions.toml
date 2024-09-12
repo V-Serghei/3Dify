@@ -17,6 +17,7 @@ pclBinariesAndroidArmv8 = "1.0.0"
 sceneformUx = "1.17.1"
 coreVersion = "1.17.1"
 navigationRuntimeKtx = "2.7.7"
+uiDesktop = "1.7.0"
 
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCore" }
@@ -36,6 +37,7 @@ pcl-binaries-android-armv8 = { module = "com.example:pcl-binaries-android-armv8"
 sceneform-ux = { group = "com.google.ar.sceneform.ux", name = "sceneform-ux", version.ref = "sceneformUx" }
 sceneform-core = { group = "com.google.ar.sceneform", name = "core", version.ref = "coreVersion" }
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
+androidx-ui-desktop = { group = "androidx.compose.ui", name = "ui-desktop", version.ref = "uiDesktop" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

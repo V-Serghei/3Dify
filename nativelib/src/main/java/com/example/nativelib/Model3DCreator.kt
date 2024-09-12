@@ -7,5 +7,5 @@ class Model3DCreator {
         }
     }
 
-    external fun processPointCloud(pointArrays: Array<FloatArray>): String
+    external fun processPointCloudToUri(pointArrays: Array<FloatArray>, fileDescriptor: Int): Boolean
 }
