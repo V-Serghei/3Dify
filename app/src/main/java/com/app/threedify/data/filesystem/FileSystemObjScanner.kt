@@ -19,7 +19,7 @@ class FileSystemObjScanner : IObjFileScanner {
     }
     override fun getSubDirectories(targetDirectory: File) :List<File>{
         val directories = mutableListOf<File>()
-        targetDirectory.walkTopDown().forEach { directory ->
+        targetDirectory.listFiles()?.forEach { directory ->
             if(directory.isDirectory){
                 directories.add(directory)
             }
