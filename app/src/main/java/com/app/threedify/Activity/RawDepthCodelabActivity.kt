@@ -17,6 +17,7 @@ package com.app.threedify.Activity
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.opengl.GLES20
@@ -97,6 +98,9 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     private lateinit var placeholderButton2: Button
     private lateinit var placeholderButton3: Button
     private lateinit var pointFixationButton: Button
+
+    private lateinit var pointArrays: Array<FloatArray>
+
     /**********************************
      * ********************************
      *Button fixed point cloud
@@ -157,6 +161,7 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
          */
         placeholderButton1.setOnClickListener{save3DModel() }
         placeholderButton2.setOnClickListener{
+            pointArrays = loadPointsFromAssets(this, "point.txt")
 
             val fileName = "model_save.obj"
             saveModelToUri(fileName) }
@@ -300,43 +305,352 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
 //        )
 //    )
 
-    private val pointArrays = arrayOf(
-        // Грань 1 (Фронтальная)
-        generateFacePoints(1f, 1f, -1f, -1f, -1f, 1f, 10),  // Добавляем 10 точек на каждую ось
+//    private val pointArrays = arrayOf(
+//        // Грань 1 (Фронтальная)
+//        generateFacePointsWithDiagonals(1f, 1f, -1f, -1f, -1f, -1f, 10),
+//
+//        // Грань 2 (Задняя)
+//        generateFacePointsWithDiagonals(1f, 1f, 1f, -1f, -1f, 1f, 10),
+//
+//        // Грань 3 (Правая)
+//        generateFacePointsWithDiagonals(1f, 1f, 1f, 1f, -1f, -1f, 10),
+//
+//        // Грань 4 (Левая)
+//        generateFacePointsWithDiagonals(-1f, 1f, 1f, -1f, -1f, -1f, 10),
+//
+//        // Грань 5 (Верхняя)
+//        generateFacePointsWithDiagonals(1f, 1f, 1f, -1f, 1f, -1f, 10),
+//
+//        // Грань 6 (Нижняя)
+//        generateFacePointsWithDiagonals(1f, -1f, 1f, -1f, -1f, -1f, 10)
+//    )
+//
+//    // Функция для генерации точек на одной грани с добавлением диагональных точек
+//    private fun generateFacePointsWithDiagonals(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float, numPoints: Int): FloatArray {
+//        val points = mutableListOf<Float>()
+//        val stepX = (x2 - x1) / (numPoints - 1)
+//        val stepY = (y2 - y1) / (numPoints - 1)
+//
+//        // Генерация точек на плоскости
+//        for (i in 0 until numPoints) {
+//            for (j in 0 until numPoints) {
+//                val x = x1 + i * stepX
+//                val y = y1 + j * stepY
+//                points.add(x)
+//                points.add(y)
+//                points.add(z1)
+//            }
+//        }
+//
+//        // Генерация диагональных точек
+//        for (i in 0 until numPoints) {
+//            // Диагональ от (x1, y1) до (x2, y2)
+//            val diagonalX1 = x1 + i * stepX
+//            val diagonalY1 = y1 + i * stepY
+//            points.add(diagonalX1)
+//            points.add(diagonalY1)
+//            points.add(z1)
+//
+//            // Диагональ от (x1, y2) до (x2, y1)
+//            val diagonalX2 = x1 + i * stepX
+//            val diagonalY2 = y2 - i * stepY
+//            points.add(diagonalX2)
+//            points.add(diagonalY2)
+//            points.add(z1)
+//        }
+//
+//        return points.toFloatArray()
+//    }
 
-        // Грань 2 (Задняя)
-        generateFacePoints(1f, 1f, 1f, 1f, -1f, 1f, 10),   // Добавляем 10 точек на каждую ось
+ //Функция для генерации точек на одной грани с добавлением диагональных точек
+//    private fun generateFacePointsWithDiagonals(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float, numPoints: Int): FloatArray {
+//        val points = mutableListOf<Float>()
+//        val stepX = (x2 - x1) / (numPoints - 1)
+//        val stepY = (y2 - y1) / (numPoints - 1)
+//
+//        // Генерация точек на плоскости
+//        for (i in 0 until numPoints) {
+//            for (j in 0 until numPoints) {
+//                val x = x1 + i * stepX
+//                val y = y1 + j * stepY
+//                points.add(x)
+//                points.add(y)
+//                points.add(z1)
+//            }
+//        }
+//
+//        // Генерация диагональных точек
+//        for (i in 0 until numPoints) {
+//            // Диагональ от (x1, y1) до (x2, y2)
+//            val diagonalX1 = x1 + i * stepX
+//            val diagonalY1 = y1 + i * stepY
+//            points.add(diagonalX1)
+//            points.add(diagonalY1)
+//            points.add(z1)
+//
+//            // Диагональ от (x1, y2) до (x2, y1)
+//            val diagonalX2 = x1 + i * stepX
+//            val diagonalY2 = y2 - i * stepY
+//            points.add(diagonalX2)
+//            points.add(diagonalY2)
+//            points.add(z1)
+//        }
+//
+//        return points.toFloatArray()
+//    }
 
-        // Грань 3 (Правая)
-        generateFacePoints(1f, 1f, 1f, 1f, -1f, -1f, 10),  // Добавляем 10 точек на каждую ось
+//    // Функция для генерации точек для всех граней куба
+//    private fun generateCubePoints(): Array<FloatArray> {
+//        return arrayOf(
+//            // Грань 1 (Фронтальная)
+//            generateFacePointsWithDiagonals(1f, 1f, -1f, -1f, -1f, -1f, 10),
+//
+//            // Грань 2 (Задняя)
+//            generateFacePointsWithDiagonals(1f, 1f, 1f, -1f, -1f, 1f, 10),
+//
+//            // Грань 3 (Правая)
+//            generateFacePointsWithDiagonals(1f, 1f, 1f, 1f, -1f, -1f, 10),
+//
+//            // Грань 4 (Левая)
+//            generateFacePointsWithDiagonals(-1f, 1f, 1f, -1f, -1f, -1f, 10),
+//
+//            // Грань 5 (Верхняя)
+//            generateFacePointsWithDiagonals(1f, 1f, 1f, -1f, 1f, -1f, 10),
+//
+//            // Грань 6 (Нижняя)
+//            generateFacePointsWithDiagonals(1f, -1f, 1f, -1f, -1f, -1f, 10)
+//        )
+//    }
+//
+//    // Пример использования
+//    val pointArrays = generateCubePoints()
 
-        // Грань 4 (Левая)
-        generateFacePoints(-1f, 1f, 1f, -1f, -1f, -1f, 10), // Добавляем 10 точек на каждую ось
+//    private val pointArrays = arrayOf(
+//        // Грань 1 (Фронтальная)
+//        generateFaceWithIndices(1f, 1f, -1f, -1f, -1f, -1f, 10),
+//
+//        // Грань 2 (Задняя)
+//        generateFaceWithIndices(1f, 1f, 1f, -1f, -1f, 1f, 10),
+//
+//        // Грань 3 (Правая)
+//        generateFaceWithIndices(1f, 1f, 1f, 1f, -1f, -1f, 10),
+//
+//        // Грань 4 (Левая)
+//        generateFaceWithIndices(-1f, 1f, 1f, -1f, -1f, -1f, 10),
+//
+//        // Грань 5 (Верхняя)
+//        generateFaceWithIndices(1f, 1f, 1f, -1f, 1f, -1f, 10),
+//
+//        // Грань 6 (Нижняя)
+//        generateFaceWithIndices(1f, -1f, 1f, -1f, -1f, -1f, 10)
+//    )
+//
+//    // Функция для генерации точек и индексов для триангуляции
+//    private fun generateFaceWithIndices(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float, numPoints: Int): Pair<FloatArray, IntArray> {
+//        val points = mutableListOf<Float>()
+//        val indices = mutableListOf<Int>()
+//        val stepX = (x2 - x1) / (numPoints - 1)
+//        val stepY = (y2 - y1) / (numPoints - 1)
+//
+//        // Генерация точек
+//        for (i in 0 until numPoints) {
+//            for (j in 0 until numPoints) {
+//                val x = x1 + i * stepX
+//                val y = y1 + j * stepY
+//                points.add(x)
+//                points.add(y)
+//                points.add(z1)
+//            }
+//        }
+//
+//        // Генерация индексов для триангуляции
+//        for (i in 0 until numPoints - 1) {
+//            for (j in 0 until numPoints - 1) {
+//                val topLeft = i * numPoints + j
+//                val topRight = topLeft + 1
+//                val bottomLeft = topLeft + numPoints
+//                val bottomRight = bottomLeft + 1
+//
+//                // Треугольник 1
+//                indices.add(topLeft)
+//                indices.add(bottomLeft)
+//                indices.add(topRight)
+//
+//                // Треугольник 2
+//                indices.add(topRight)
+//                indices.add(bottomLeft)
+//                indices.add(bottomRight)
+//            }
+//        }
+//
+//        return Pair(points.toFloatArray(), indices.toIntArray())
+//    }
 
-        // Грань 5 (Верхняя)
-        generateFacePoints(1f, 1f, 1f, -1f, 1f, -1f, 10),   // Добавляем 10 точек на каждую ось
+//    private fun generateEdgePoints(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float, numPoints: Int): List<Float> {
+//        val edgePoints = mutableListOf<Float>()
+//        val stepX = (x2 - x1) / (numPoints - 1)
+//        val stepY = (y2 - y1) / (numPoints - 1)
+//        val stepZ = (z2 - z1) / (numPoints - 1)
+//
+//        for (i in 0 until numPoints) {
+//            val x = x1 + i * stepX
+//            val y = y1 + i * stepY
+//            val z = z1 + i * stepZ
+//            edgePoints.add(x)
+//            edgePoints.add(y)
+//            edgePoints.add(z)
+//        }
+//
+//        return edgePoints
+//    }
+//
+//    private fun generateCubePointsWithEdges(): Array<FloatArray> {
+//        val points = mutableListOf<Float>()
+//
+//        // Генерация точек для всех граней
+//        points.addAll(generateFacePointsWithDiagonals(1f, 1f, -1f, -1f, -1f, -1f, 10).toList())  // Передняя грань
+//        points.addAll(generateFacePointsWithDiagonals(1f, 1f, 1f, -1f, -1f, 1f, 10).toList())    // Задняя грань
+//        points.addAll(generateFacePointsWithDiagonals(1f, 1f, 1f, 1f, -1f, -1f, 10).toList())    // Правая грань
+//        points.addAll(generateFacePointsWithDiagonals(-1f, 1f, 1f, -1f, -1f, -1f, 10).toList())  // Левая грань
+//        points.addAll(generateFacePointsWithDiagonals(1f, 1f, 1f, -1f, 1f, -1f, 10).toList())    // Верхняя грань
+//        points.addAll(generateFacePointsWithDiagonals(1f, -1f, 1f, -1f, -1f, -1f, 10).toList())  // Нижняя грань
+//
+//        // Добавляем рёбра куба для соединения граней
+//        points.addAll(generateEdgePoints(1f, 1f, -1f, 1f, 1f, 1f, 10))  // Ребро 1
+//        points.addAll(generateEdgePoints(1f, -1f, -1f, 1f, -1f, 1f, 10))  // Ребро 2
+//        points.addAll(generateEdgePoints(-1f, 1f, -1f, -1f, 1f, 1f, 10))  // Ребро 3
+//        points.addAll(generateEdgePoints(-1f, -1f, -1f, -1f, -1f, 1f, 10))  // Ребро 4
+//        points.addAll(generateEdgePoints(1f, 1f, -1f, -1f, 1f, -1f, 10))  // Ребро 5
+//        points.addAll(generateEdgePoints(1f, -1f, -1f, -1f, -1f, -1f, 10))  // Ребро 6
+//        points.addAll(generateEdgePoints(1f, 1f, 1f, -1f, 1f, 1f, 10))  // Ребро 7
+//        points.addAll(generateEdgePoints(1f, -1f, 1f, -1f, -1f, 1f, 10))  // Ребро 8
+//        points.addAll(generateEdgePoints(1f, 1f, -1f, 1f, -1f, -1f, 10))  // Ребро 9
+//        points.addAll(generateEdgePoints(-1f, 1f, -1f, -1f, -1f, -1f, 10))  // Ребро 10
+//        points.addAll(generateEdgePoints(1f, 1f, 1f, 1f, -1f, 1f, 10))  // Ребро 11
+//        points.addAll(generateEdgePoints(-1f, 1f, 1f, -1f, -1f, 1f, 10))  // Ребро 12
+//
+//        // Преобразуем результат в массив
+//        return arrayOf(points.toFloatArray())
+//    }
+//
+//    // Пример использования
+////    val pointArrays: Array<FloatArray> = generateCubePointsWithEdges()
+//    private fun generateFullFacePoints(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float, numPoints: Int): FloatArray {
+//        val points = mutableListOf<Float>()
+//        val stepX = (x2 - x1) / (numPoints - 1)
+//        val stepY = (y2 - y1) / (numPoints - 1)
+//
+//        for (i in 0 until numPoints) {
+//            for (j in 0 until numPoints) {
+//                val x = x1 + i * stepX
+//                val y = y1 + j * stepY
+//                points.add(x)
+//                points.add(y)
+//                points.add(z1)
+//            }
+//        }
+//
+//        return points.toFloatArray()
+//    }
+////
+//    private fun generateCompleteCubePoints(): Array<FloatArray> {
+//        return arrayOf(
+//            generateFullFacePoints(1f, 1f, -1f, -1f, -1f, -1f, 50),  // Передняя грань
+//            generateFullFacePoints(1f, 1f, 1f, -1f, -1f, 1f, 50),    // Задняя грань
+//            generateFullFacePoints(1f, 1f, 1f, 1f, -1f, -1f, 50),    // Правая грань
+//            generateFullFacePoints(-1f, 1f, 1f, -1f, -1f, -1f, 50),  // Левая грань
+//            generateFullFacePoints(1f, 1f, 1f, -1f, 1f, -1f, 50),    // Верхняя грань
+//            generateFullFacePoints(1f, -1f, 1f, -1f, -1f, -1f, 50)   // Нижняя грань
+//        )
+//    }
+//    private fun generateFullCubePoints(): Array<FloatArray> {
+//        return arrayOf(
+//            // Передняя грань
+//            generateFullFacePoints(1f, 1f, -1f, -1f, -1f, -1f, 10),
+//            // Задняя грань
+//            generateFullFacePoints(1f, 1f, 1f, -1f, -1f, 1f, 10),
+//            // Правая грань
+//            generateFullFacePoints(1f, 1f, 1f, 1f, -1f, -1f, 10),
+//            // Левая грань
+//            generateFullFacePoints(-1f, 1f, 1f, -1f, -1f, -1f, 10),
+//            // Верхняя грань
+//            generateFullFacePoints(1f, 1f, 1f, -1f, 1f, -1f, 10),
+//            // Нижняя грань
+//            generateFullFacePoints(1f, -1f, 1f, -1f, -1f, -1f, 10),
+//
+//            // Добавляем угловые точки куба
+//            floatArrayOf(1f, 1f, 1f),  // Верхний правый передний угол
+//            floatArrayOf(1f, 1f, -1f), // Верхний правый задний угол
+//            floatArrayOf(-1f, 1f, 1f), // Верхний левый передний угол
+//            floatArrayOf(-1f, 1f, -1f),// Верхний левый задний угол
+//            floatArrayOf(1f, -1f, 1f), // Нижний правый передний угол
+//            floatArrayOf(1f, -1f, -1f),// Нижний правый задний угол
+//            floatArrayOf(-1f, -1f, 1f),// Нижний левый передний угол
+//            floatArrayOf(-1f, -1f, -1f)// Нижний левый задний угол
+//        )
+//    }
+//    // Пример использования
+//    val pointArrays: Array<FloatArray> = generateFullCubePoints()
 
-        // Грань 6 (Нижняя)
-        generateFacePoints(1f, -1f, 1f, -1f, -1f, -1f, 10)  // Добавляем 10 точек на каждую ось
-    )
 
-    // Функция для генерации точек на одной грани
-    private fun generateFacePoints(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float, numPoints: Int): FloatArray {
-        val points = mutableListOf<Float>()
-        val stepX = (x2 - x1) / (numPoints - 1)
-        val stepY = (y2 - y1) / (numPoints - 1)
+    // Генерация треугольной грани
+//    private fun generateTriangleFacePoints(x1: Float, y1: Float, z1: Float,
+//                                           x2: Float, y2: Float, z2: Float,
+//                                           x3: Float, y3: Float, z3: Float, numPoints: Int): FloatArray {
+//        val points = mutableListOf<Float>()
+//
+//        for (i in 0 until numPoints) {
+//            val t = i.toFloat() / (numPoints - 1)
+//            for (j in 0 until numPoints - i) {
+//                val u = j.toFloat() / (numPoints - 1 - i)
+//                val v = 1.0f - t - u
+//
+//                val x = t * x1 + u * x2 + v * x3
+//                val y = t * y1 + u * y2 + v * y3
+//                val z = t * z1 + u * z2 + v * z3
+//                points.add(x)
+//                points.add(y)
+//                points.add(z)
+//            }
+//        }
+//
+//        return points.toFloatArray()
+//    }
+//
+//    // Генерация пирамиды
+//    private fun generateCompletePyramidPoints(): Array<FloatArray> {
+//        return arrayOf(
+//            // Нижняя квадратная грань (основание)
+//            generateFullFacePoints(1f, 1f, -1f, -1f, -1f, -1f, 50),
+//
+//            // Треугольные боковые грани
+//            generateTriangleFacePoints(0f, 0f, 1f,  1f, 1f, -1f, -1f, 1f, -1f, 50),  // Передняя грань
+//            generateTriangleFacePoints(0f, 0f, 1f,  1f, -1f, -1f, -1f, -1f, -1f, 50), // Задняя грань
+//            generateTriangleFacePoints(0f, 0f, 1f,  -1f, 1f, -1f, -1f, -1f, -1f, 50), // Левая грань
+//            generateTriangleFacePoints(0f, 0f, 1f,  1f, 1f, -1f, 1f, -1f, -1f, 50)   // Правая грань
+//        )
+//    }
 
-        for (i in 0 until numPoints) {
-            for (j in 0 until numPoints) {
-                val x = x1 + i * stepX
-                val y = y1 + j * stepY
-                points.add(x)
-                points.add(y)
-                points.add(z1)
+    // Пример использования
+//    val pointArrays: Array<FloatArray> = generateCompletePyramidPoints()
+
+    private fun loadPointsFromAssets(context: Context, fileName: String): Array<FloatArray> {
+        val pointsList = mutableListOf<FloatArray>()
+
+        // Получение AssetManager и чтение файла
+        context.assets.open(fileName).bufferedReader().use { reader ->
+            reader.forEachLine { line ->
+                if (line.startsWith("v ")) {
+                    val parts = line.split(" ")
+                    val x = parts[1].toFloat()
+                    val y = parts[2].toFloat()
+                    val z = parts[3].toFloat()
+                    pointsList.add(floatArrayOf(x, y, z))
+                }
             }
         }
 
-        return points.toFloatArray()
+        return pointsList.toTypedArray()
     }
 
 
