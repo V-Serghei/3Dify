@@ -61,6 +61,10 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.nio.FloatBuffer
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.UUID
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.pow
@@ -99,7 +103,13 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     private lateinit var placeholderButton3: Button
     private lateinit var pointFixationButton: Button
 
+    /**********************************
+     * ********************************
+     *The main keeper of points before sending to the native library.
+     *********************************/
     private lateinit var pointArrays: Array<FloatArray>
+    //Native lib class
+    private val model3DCreator = Model3DCreator()
 
     /**********************************
      * ********************************
@@ -159,13 +169,26 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
          *  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
          * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
          */
-        placeholderButton1.setOnClickListener{save3DModel() }
+        placeholderButton1.setOnClickListener{ /**here will be called the method that you add here*/}
+
+        /**
+         * ********************************
+         * ********************************
+         *Saving points from the file point.txt
+         * Generation of a model based on this data.
+         */
         placeholderButton2.setOnClickListener{
             pointArrays = loadPointsFromAssets(this, "point.txt")
-
-            val fileName = "model_save.obj"
+            val fileName = generateFileName("model_txt","obj")
             saveModelToUri(fileName) }
-        placeholderButton3.setOnClickListener{/**here will be called the method that you add here*/}
+
+        placeholderButton3.setOnClickListener {
+            // Saving points to a PCD file.
+            savePointsToPCDFile()
+
+            // Preparing points for saving the model.
+            preparePointsForModel()
+        }
 
         pointFixationButton.setOnClickListener{fixatePoints()}
 
@@ -231,413 +254,21 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     }
 
     /**
-     * Point cloud save obj test
+     * Saving points and converting them into a 3D model.
      *  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
      * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
      */
-//    private val pointArrays = arrayOf(
-//        floatArrayOf(
-//            // Нижняя грань (Z = 0)
-//            0.0f, 0.0f, 0.0f,   // Точка (0, 0, 0)
-//            1.0f, 0.0f, 0.0f,   // Точка (1, 0, 0)
-//            2.0f, 0.0f, 0.0f,   // Точка (2, 0, 0)
-//            2.0f, 1.0f, 0.0f,   // Точка (2, 1, 0)
-//            1.0f, 1.0f, 0.0f,   // Точка (1, 1, 0)
-//            0.0f, 1.0f, 0.0f,   // Точка (0, 1, 0)
-//            0.0f, 2.0f, 0.0f,   // Точка (0, 2, 0)
-//            1.0f, 2.0f, 0.0f,   // Точка (1, 2, 0)
-//            2.0f, 2.0f, 0.0f,   // Точка (2, 2, 0)
-//
-//            // Верхняя грань (Z = 1)
-//            0.0f, 0.0f, 1.0f,   // Точка (0, 0, 1)
-//            1.0f, 0.0f, 1.0f,   // Точка (1, 0, 1)
-//            2.0f, 0.0f, 1.0f,   // Точка (2, 0, 1)
-//            2.0f, 1.0f, 1.0f,   // Точка (2, 1, 1)
-//            1.0f, 1.0f, 1.0f,   // Точка (1, 1, 1)
-//            0.0f, 1.0f, 1.0f,   // Точка (0, 1, 1)
-//            0.0f, 2.0f, 1.0f,   // Точка (0, 2, 1)
-//            1.0f, 2.0f, 1.0f,   // Точка (1, 2, 1)
-//            2.0f, 2.0f, 1.0f    // Точка (2, 2, 1)
-//        )
-//    )
-//    private val pointArrays = arrayOf(
-//        // Грань 1 (Фронтальная)
-//        floatArrayOf(
-//            1f, 1f, -1f,  // Вершина 1
-//            -1f, 1f, -1f, // Вершина 2
-//            -1f, -1f, -1f, // Вершина 3
-//            1f, -1f, -1f  // Вершина 4
-//        ),
-//        // Грань 2 (Задняя)
-//        floatArrayOf(
-//            1f, 1f, 1f,   // Вершина 1
-//            1f, -1f, 1f,  // Вершина 2
-//            -1f, -1f, 1f, // Вершина 3
-//            -1f, 1f, 1f   // Вершина 4
-//        ),
-//        // Грань 3 (Правая)
-//        floatArrayOf(
-//            1f, 1f, 1f,   // Вершина 1
-//            1f, -1f, 1f,  // Вершина 2
-//            1f, -1f, -1f, // Вершина 3
-//            1f, 1f, -1f   // Вершина 4
-//        ),
-//        // Грань 4 (Левая)
-//        floatArrayOf(
-//            -1f, 1f, 1f,  // Вершина 1
-//            -1f, 1f, -1f, // Вершина 2
-//            -1f, -1f, -1f, // Вершина 3
-//            -1f, -1f, 1f   // Вершина 4
-//        ),
-//        // Грань 5 (Верхняя)
-//        floatArrayOf(
-//            1f, 1f, 1f,   // Вершина 1
-//            1f, 1f, -1f,  // Вершина 2
-//            -1f, 1f, -1f, // Вершина 3
-//            -1f, 1f, 1f   // Вершина 4
-//        ),
-//        // Грань 6 (Нижняя)
-//        floatArrayOf(
-//            1f, -1f, 1f,  // Вершина 1
-//            1f, -1f, -1f, // Вершина 2
-//            -1f, -1f, -1f, // Вершина 3
-//            -1f, -1f, 1f   // Вершина 4
-//        )
-//    )
 
-//    private val pointArrays = arrayOf(
-//        // Грань 1 (Фронтальная)
-//        generateFacePointsWithDiagonals(1f, 1f, -1f, -1f, -1f, -1f, 10),
-//
-//        // Грань 2 (Задняя)
-//        generateFacePointsWithDiagonals(1f, 1f, 1f, -1f, -1f, 1f, 10),
-//
-//        // Грань 3 (Правая)
-//        generateFacePointsWithDiagonals(1f, 1f, 1f, 1f, -1f, -1f, 10),
-//
-//        // Грань 4 (Левая)
-//        generateFacePointsWithDiagonals(-1f, 1f, 1f, -1f, -1f, -1f, 10),
-//
-//        // Грань 5 (Верхняя)
-//        generateFacePointsWithDiagonals(1f, 1f, 1f, -1f, 1f, -1f, 10),
-//
-//        // Грань 6 (Нижняя)
-//        generateFacePointsWithDiagonals(1f, -1f, 1f, -1f, -1f, -1f, 10)
-//    )
-//
-//    // Функция для генерации точек на одной грани с добавлением диагональных точек
-//    private fun generateFacePointsWithDiagonals(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float, numPoints: Int): FloatArray {
-//        val points = mutableListOf<Float>()
-//        val stepX = (x2 - x1) / (numPoints - 1)
-//        val stepY = (y2 - y1) / (numPoints - 1)
-//
-//        // Генерация точек на плоскости
-//        for (i in 0 until numPoints) {
-//            for (j in 0 until numPoints) {
-//                val x = x1 + i * stepX
-//                val y = y1 + j * stepY
-//                points.add(x)
-//                points.add(y)
-//                points.add(z1)
-//            }
-//        }
-//
-//        // Генерация диагональных точек
-//        for (i in 0 until numPoints) {
-//            // Диагональ от (x1, y1) до (x2, y2)
-//            val diagonalX1 = x1 + i * stepX
-//            val diagonalY1 = y1 + i * stepY
-//            points.add(diagonalX1)
-//            points.add(diagonalY1)
-//            points.add(z1)
-//
-//            // Диагональ от (x1, y2) до (x2, y1)
-//            val diagonalX2 = x1 + i * stepX
-//            val diagonalY2 = y2 - i * stepY
-//            points.add(diagonalX2)
-//            points.add(diagonalY2)
-//            points.add(z1)
-//        }
-//
-//        return points.toFloatArray()
-//    }
-
- //Функция для генерации точек на одной грани с добавлением диагональных точек
-//    private fun generateFacePointsWithDiagonals(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float, numPoints: Int): FloatArray {
-//        val points = mutableListOf<Float>()
-//        val stepX = (x2 - x1) / (numPoints - 1)
-//        val stepY = (y2 - y1) / (numPoints - 1)
-//
-//        // Генерация точек на плоскости
-//        for (i in 0 until numPoints) {
-//            for (j in 0 until numPoints) {
-//                val x = x1 + i * stepX
-//                val y = y1 + j * stepY
-//                points.add(x)
-//                points.add(y)
-//                points.add(z1)
-//            }
-//        }
-//
-//        // Генерация диагональных точек
-//        for (i in 0 until numPoints) {
-//            // Диагональ от (x1, y1) до (x2, y2)
-//            val diagonalX1 = x1 + i * stepX
-//            val diagonalY1 = y1 + i * stepY
-//            points.add(diagonalX1)
-//            points.add(diagonalY1)
-//            points.add(z1)
-//
-//            // Диагональ от (x1, y2) до (x2, y1)
-//            val diagonalX2 = x1 + i * stepX
-//            val diagonalY2 = y2 - i * stepY
-//            points.add(diagonalX2)
-//            points.add(diagonalY2)
-//            points.add(z1)
-//        }
-//
-//        return points.toFloatArray()
-//    }
-
-//    // Функция для генерации точек для всех граней куба
-//    private fun generateCubePoints(): Array<FloatArray> {
-//        return arrayOf(
-//            // Грань 1 (Фронтальная)
-//            generateFacePointsWithDiagonals(1f, 1f, -1f, -1f, -1f, -1f, 10),
-//
-//            // Грань 2 (Задняя)
-//            generateFacePointsWithDiagonals(1f, 1f, 1f, -1f, -1f, 1f, 10),
-//
-//            // Грань 3 (Правая)
-//            generateFacePointsWithDiagonals(1f, 1f, 1f, 1f, -1f, -1f, 10),
-//
-//            // Грань 4 (Левая)
-//            generateFacePointsWithDiagonals(-1f, 1f, 1f, -1f, -1f, -1f, 10),
-//
-//            // Грань 5 (Верхняя)
-//            generateFacePointsWithDiagonals(1f, 1f, 1f, -1f, 1f, -1f, 10),
-//
-//            // Грань 6 (Нижняя)
-//            generateFacePointsWithDiagonals(1f, -1f, 1f, -1f, -1f, -1f, 10)
-//        )
-//    }
-//
-//    // Пример использования
-//    val pointArrays = generateCubePoints()
-
-//    private val pointArrays = arrayOf(
-//        // Грань 1 (Фронтальная)
-//        generateFaceWithIndices(1f, 1f, -1f, -1f, -1f, -1f, 10),
-//
-//        // Грань 2 (Задняя)
-//        generateFaceWithIndices(1f, 1f, 1f, -1f, -1f, 1f, 10),
-//
-//        // Грань 3 (Правая)
-//        generateFaceWithIndices(1f, 1f, 1f, 1f, -1f, -1f, 10),
-//
-//        // Грань 4 (Левая)
-//        generateFaceWithIndices(-1f, 1f, 1f, -1f, -1f, -1f, 10),
-//
-//        // Грань 5 (Верхняя)
-//        generateFaceWithIndices(1f, 1f, 1f, -1f, 1f, -1f, 10),
-//
-//        // Грань 6 (Нижняя)
-//        generateFaceWithIndices(1f, -1f, 1f, -1f, -1f, -1f, 10)
-//    )
-//
-//    // Функция для генерации точек и индексов для триангуляции
-//    private fun generateFaceWithIndices(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float, numPoints: Int): Pair<FloatArray, IntArray> {
-//        val points = mutableListOf<Float>()
-//        val indices = mutableListOf<Int>()
-//        val stepX = (x2 - x1) / (numPoints - 1)
-//        val stepY = (y2 - y1) / (numPoints - 1)
-//
-//        // Генерация точек
-//        for (i in 0 until numPoints) {
-//            for (j in 0 until numPoints) {
-//                val x = x1 + i * stepX
-//                val y = y1 + j * stepY
-//                points.add(x)
-//                points.add(y)
-//                points.add(z1)
-//            }
-//        }
-//
-//        // Генерация индексов для триангуляции
-//        for (i in 0 until numPoints - 1) {
-//            for (j in 0 until numPoints - 1) {
-//                val topLeft = i * numPoints + j
-//                val topRight = topLeft + 1
-//                val bottomLeft = topLeft + numPoints
-//                val bottomRight = bottomLeft + 1
-//
-//                // Треугольник 1
-//                indices.add(topLeft)
-//                indices.add(bottomLeft)
-//                indices.add(topRight)
-//
-//                // Треугольник 2
-//                indices.add(topRight)
-//                indices.add(bottomLeft)
-//                indices.add(bottomRight)
-//            }
-//        }
-//
-//        return Pair(points.toFloatArray(), indices.toIntArray())
-//    }
-
-//    private fun generateEdgePoints(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float, numPoints: Int): List<Float> {
-//        val edgePoints = mutableListOf<Float>()
-//        val stepX = (x2 - x1) / (numPoints - 1)
-//        val stepY = (y2 - y1) / (numPoints - 1)
-//        val stepZ = (z2 - z1) / (numPoints - 1)
-//
-//        for (i in 0 until numPoints) {
-//            val x = x1 + i * stepX
-//            val y = y1 + i * stepY
-//            val z = z1 + i * stepZ
-//            edgePoints.add(x)
-//            edgePoints.add(y)
-//            edgePoints.add(z)
-//        }
-//
-//        return edgePoints
-//    }
-//
-//    private fun generateCubePointsWithEdges(): Array<FloatArray> {
-//        val points = mutableListOf<Float>()
-//
-//        // Генерация точек для всех граней
-//        points.addAll(generateFacePointsWithDiagonals(1f, 1f, -1f, -1f, -1f, -1f, 10).toList())  // Передняя грань
-//        points.addAll(generateFacePointsWithDiagonals(1f, 1f, 1f, -1f, -1f, 1f, 10).toList())    // Задняя грань
-//        points.addAll(generateFacePointsWithDiagonals(1f, 1f, 1f, 1f, -1f, -1f, 10).toList())    // Правая грань
-//        points.addAll(generateFacePointsWithDiagonals(-1f, 1f, 1f, -1f, -1f, -1f, 10).toList())  // Левая грань
-//        points.addAll(generateFacePointsWithDiagonals(1f, 1f, 1f, -1f, 1f, -1f, 10).toList())    // Верхняя грань
-//        points.addAll(generateFacePointsWithDiagonals(1f, -1f, 1f, -1f, -1f, -1f, 10).toList())  // Нижняя грань
-//
-//        // Добавляем рёбра куба для соединения граней
-//        points.addAll(generateEdgePoints(1f, 1f, -1f, 1f, 1f, 1f, 10))  // Ребро 1
-//        points.addAll(generateEdgePoints(1f, -1f, -1f, 1f, -1f, 1f, 10))  // Ребро 2
-//        points.addAll(generateEdgePoints(-1f, 1f, -1f, -1f, 1f, 1f, 10))  // Ребро 3
-//        points.addAll(generateEdgePoints(-1f, -1f, -1f, -1f, -1f, 1f, 10))  // Ребро 4
-//        points.addAll(generateEdgePoints(1f, 1f, -1f, -1f, 1f, -1f, 10))  // Ребро 5
-//        points.addAll(generateEdgePoints(1f, -1f, -1f, -1f, -1f, -1f, 10))  // Ребро 6
-//        points.addAll(generateEdgePoints(1f, 1f, 1f, -1f, 1f, 1f, 10))  // Ребро 7
-//        points.addAll(generateEdgePoints(1f, -1f, 1f, -1f, -1f, 1f, 10))  // Ребро 8
-//        points.addAll(generateEdgePoints(1f, 1f, -1f, 1f, -1f, -1f, 10))  // Ребро 9
-//        points.addAll(generateEdgePoints(-1f, 1f, -1f, -1f, -1f, -1f, 10))  // Ребро 10
-//        points.addAll(generateEdgePoints(1f, 1f, 1f, 1f, -1f, 1f, 10))  // Ребро 11
-//        points.addAll(generateEdgePoints(-1f, 1f, 1f, -1f, -1f, 1f, 10))  // Ребро 12
-//
-//        // Преобразуем результат в массив
-//        return arrayOf(points.toFloatArray())
-//    }
-//
-//    // Пример использования
-////    val pointArrays: Array<FloatArray> = generateCubePointsWithEdges()
-//    private fun generateFullFacePoints(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float, numPoints: Int): FloatArray {
-//        val points = mutableListOf<Float>()
-//        val stepX = (x2 - x1) / (numPoints - 1)
-//        val stepY = (y2 - y1) / (numPoints - 1)
-//
-//        for (i in 0 until numPoints) {
-//            for (j in 0 until numPoints) {
-//                val x = x1 + i * stepX
-//                val y = y1 + j * stepY
-//                points.add(x)
-//                points.add(y)
-//                points.add(z1)
-//            }
-//        }
-//
-//        return points.toFloatArray()
-//    }
-////
-//    private fun generateCompleteCubePoints(): Array<FloatArray> {
-//        return arrayOf(
-//            generateFullFacePoints(1f, 1f, -1f, -1f, -1f, -1f, 50),  // Передняя грань
-//            generateFullFacePoints(1f, 1f, 1f, -1f, -1f, 1f, 50),    // Задняя грань
-//            generateFullFacePoints(1f, 1f, 1f, 1f, -1f, -1f, 50),    // Правая грань
-//            generateFullFacePoints(-1f, 1f, 1f, -1f, -1f, -1f, 50),  // Левая грань
-//            generateFullFacePoints(1f, 1f, 1f, -1f, 1f, -1f, 50),    // Верхняя грань
-//            generateFullFacePoints(1f, -1f, 1f, -1f, -1f, -1f, 50)   // Нижняя грань
-//        )
-//    }
-//    private fun generateFullCubePoints(): Array<FloatArray> {
-//        return arrayOf(
-//            // Передняя грань
-//            generateFullFacePoints(1f, 1f, -1f, -1f, -1f, -1f, 10),
-//            // Задняя грань
-//            generateFullFacePoints(1f, 1f, 1f, -1f, -1f, 1f, 10),
-//            // Правая грань
-//            generateFullFacePoints(1f, 1f, 1f, 1f, -1f, -1f, 10),
-//            // Левая грань
-//            generateFullFacePoints(-1f, 1f, 1f, -1f, -1f, -1f, 10),
-//            // Верхняя грань
-//            generateFullFacePoints(1f, 1f, 1f, -1f, 1f, -1f, 10),
-//            // Нижняя грань
-//            generateFullFacePoints(1f, -1f, 1f, -1f, -1f, -1f, 10),
-//
-//            // Добавляем угловые точки куба
-//            floatArrayOf(1f, 1f, 1f),  // Верхний правый передний угол
-//            floatArrayOf(1f, 1f, -1f), // Верхний правый задний угол
-//            floatArrayOf(-1f, 1f, 1f), // Верхний левый передний угол
-//            floatArrayOf(-1f, 1f, -1f),// Верхний левый задний угол
-//            floatArrayOf(1f, -1f, 1f), // Нижний правый передний угол
-//            floatArrayOf(1f, -1f, -1f),// Нижний правый задний угол
-//            floatArrayOf(-1f, -1f, 1f),// Нижний левый передний угол
-//            floatArrayOf(-1f, -1f, -1f)// Нижний левый задний угол
-//        )
-//    }
-//    // Пример использования
-//    val pointArrays: Array<FloatArray> = generateFullCubePoints()
-
-
-    // Генерация треугольной грани
-//    private fun generateTriangleFacePoints(x1: Float, y1: Float, z1: Float,
-//                                           x2: Float, y2: Float, z2: Float,
-//                                           x3: Float, y3: Float, z3: Float, numPoints: Int): FloatArray {
-//        val points = mutableListOf<Float>()
-//
-//        for (i in 0 until numPoints) {
-//            val t = i.toFloat() / (numPoints - 1)
-//            for (j in 0 until numPoints - i) {
-//                val u = j.toFloat() / (numPoints - 1 - i)
-//                val v = 1.0f - t - u
-//
-//                val x = t * x1 + u * x2 + v * x3
-//                val y = t * y1 + u * y2 + v * y3
-//                val z = t * z1 + u * z2 + v * z3
-//                points.add(x)
-//                points.add(y)
-//                points.add(z)
-//            }
-//        }
-//
-//        return points.toFloatArray()
-//    }
-//
-//    // Генерация пирамиды
-//    private fun generateCompletePyramidPoints(): Array<FloatArray> {
-//        return arrayOf(
-//            // Нижняя квадратная грань (основание)
-//            generateFullFacePoints(1f, 1f, -1f, -1f, -1f, -1f, 50),
-//
-//            // Треугольные боковые грани
-//            generateTriangleFacePoints(0f, 0f, 1f,  1f, 1f, -1f, -1f, 1f, -1f, 50),  // Передняя грань
-//            generateTriangleFacePoints(0f, 0f, 1f,  1f, -1f, -1f, -1f, -1f, -1f, 50), // Задняя грань
-//            generateTriangleFacePoints(0f, 0f, 1f,  -1f, 1f, -1f, -1f, -1f, -1f, 50), // Левая грань
-//            generateTriangleFacePoints(0f, 0f, 1f,  1f, 1f, -1f, 1f, -1f, -1f, 50)   // Правая грань
-//        )
-//    }
-
-    // Пример использования
-//    val pointArrays: Array<FloatArray> = generateCompletePyramidPoints()
-
+    /**
+     * Here, data is read from the file point.txt and converted into a 3D model.
+     * The file is located in app/assets/.
+     * return: Array<FloatArray> - With prepared points for processing.
+     *  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+     * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+     */
     private fun loadPointsFromAssets(context: Context, fileName: String): Array<FloatArray> {
         val pointsList = mutableListOf<FloatArray>()
 
-        // Получение AssetManager и чтение файла
         context.assets.open(fileName).bufferedReader().use { reader ->
             reader.forEachLine { line ->
                 if (line.startsWith("v ")) {
@@ -654,100 +285,188 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     }
 
 
-    private val model3DCreator = Model3DCreator()
+    /**
+     * Creating a link to the Downloads folder on an Android device
+     * and granting permission to save.
+     * return: Uri - A link to the location where the model is saved.
+     *  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+     * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+     */
+    private fun createModelUri(fileName: String): Uri? {
+        val resolver = application.contentResolver
+        val values = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+        }
 
-    private fun save3DModel() {
-        val fileName = "my3DModel.obj"
-
-        //val savedFilePath = model3DCreator.processPointCloud(pointArrays, fileName)
-
-        //Log.d("JNI", "3D модель сохранена по пути: $savedFilePath")
+        return resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)?.also {
+            Log.d("JNI", "URI: $it")
+        } ?: run {
+            Log.e("JNI", "Failed to create URI for saving the file.")
+            null
+        }
     }
-//    private fun saveModelToFile(fileName: String) {
-//        val resolver = application.contentResolver
-//        val values = ContentValues().apply {
-//            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-//            put(MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream")
-//            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-//        }
-//
-//        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
-//        Log.d("JNI", "URI: $uri")
-//        uri?.let {
-//            resolver.openOutputStream(uri)?.use { outputStream ->
-//                val result = model3DCreator.processPointCloud(pointArrays)
-//                Log.d("JNI", "3D модель сохранена результатом: $result")
-//            } ?: run {
-//                Log.e("JNI", "Не удалось открыть OutputStream для URI.")
-//            }
-//        } ?: run {
-//            Log.e("JNI", "Не удалось создать URI для сохранения файла.")
-//        }
-//    }
-
-//    private fun createModelFile(fileName: String): String? {
-//        val resolver = application.contentResolver
-//        val values = ContentValues().apply {
-//            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-//            put(MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream")
-//            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-//        }
-//
-//        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
-//        Log.d("JNI", "URI: $uri")
-//        uri?.let {
-//            val filePath = uri.path
-//            Log.d("JNI", "File path: $filePath")
-//            return filePath
-//        } ?: run {
-//            Log.e("JNI", "Не удалось создать URI для сохранения файла.")
-//            return null
-//        }
-//    }
-//    private fun saveModelToFile(fileName: String) {
-//        val filePath = createModelFile(fileName)
-//        if (filePath != null) {
-//            val result = model3DCreator.processPointCloud(pointArrays, filePath)
-//            Log.d("JNI", "3D модель сохранена результатом: $result")
-//        } else {
-//            Log.e("JNI", "Не удалось создать файл для сохранения модели.")
-//        }
-//    }
-private fun createModelUri(fileName: String): Uri? {
-    val resolver = application.contentResolver
-    val values = ContentValues().apply {
-        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-        put(MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream")
-        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-    }
-
-    return resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)?.also {
-        Log.d("JNI", "URI: $it")
-    } ?: run {
-        Log.e("JNI", "Не удалось создать URI для сохранения файла.")
-        null
-    }
-}
-
+    /**
+     * Calling a native method,
+     * passing an array of points constructed from the point cloud,
+     * obtaining the model, and saving it in the Downloads folder.
+     *  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+     * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+     */
     private fun saveModelToUri(fileName: String) {
         val uri = createModelUri(fileName)
         if (uri != null) {
             val parcelFileDescriptor = contentResolver.openFileDescriptor(uri, "w")
             parcelFileDescriptor?.let {
-                val result = model3DCreator.processPointCloudToUri(pointArrays, it.detachFd())
-                Log.d("JNI", "3D модель сохранена результатом: $result")
+                try {
+                    // Calling a native method
+                    val result = model3DCreator.processPointCloudToUri(pointArrays, it.detachFd())
+                    Log.d("JNI", "The 3D model has been saved as the result: $result")
+                    Toast.makeText(this, "3D model saved successfully!", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    Log.e("JNI", "An error occurred while processing the point cloud to URI: ${e.message}")
+                    e.printStackTrace()
+
+                    // Displaying a Toast message with error information
+                    Toast.makeText(
+                        this,
+                        "Failed to save 3D model: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             } ?: run {
-                Log.e("JNI", "Не удалось получить дескриптор файла для сохранения модели.")
+                Log.e("JNI", "Failed to obtain a file descriptor for saving the model.")
+
+                // Displaying a Toast message for file descriptor error
+                Toast.makeText(
+                    this,
+                    "Failed to obtain a file descriptor for saving the model.",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         } else {
-            Log.e("JNI", "Не удалось создать URI для сохранения модели.")
+            Log.e("JNI", "Failed to create a URI for saving the model.")
+
+            // Displaying a Toast message for URI creation error
+            Toast.makeText(
+                this,
+                "Failed to create a URI for saving the model.",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
 
+    /**
+     * Method for saving point data in PCD format.
+     *  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+     * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+     */
+    private fun savePointsToPCDFile() {
+        val fileName = generateFileName("point","pcd")
+        val uri = createModelUriPcd(fileName)
+
+        if (uri != null) {
+            val parcelFileDescriptor = contentResolver.openFileDescriptor(uri, "w")
+            parcelFileDescriptor?.let { pfd ->
+                FileOutputStream(pfd.fileDescriptor).use { fos ->
+                    OutputStreamWriter(fos).use { writer ->
+                        writer.write("# .PCD v0.7 - Point Cloud Data file format\n")
+                        writer.write("VERSION 0.7\n")
+                        writer.write("FIELDS x y z\n")
+                        writer.write("SIZE 4 4 4\n")
+                        writer.write("TYPE F F F\n")
+                        writer.write("COUNT 1 1 1\n")
+
+                        var totalPoints = 0
+                        savedPoints.forEach { points ->
+                            totalPoints += points.capacity() / 3
+                        }
+                        writer.write("WIDTH $totalPoints\n")
+                        writer.write("HEIGHT 1\n")
+                        writer.write("VIEWPOINT 0 0 0 1 0 0 0\n")
+                        writer.write("POINTS $totalPoints\n")
+                        writer.write("DATA ascii\n")
+
+                        // Record all points
+                        savedPoints.forEach { points ->
+                            val pointCount = points.capacity() / 3
+                            for (i in 0 until pointCount) {
+                                val x = points.get(i * 3)
+                                val y = points.get(i * 3 + 1)
+                                val z = points.get(i * 3 + 2)
+                                writer.write("$x $y $z\n")
+                            }
+                        }
+                    }
+                }
+                pfd.close()
+            }
+            Log.d(TAG, "Points saved to PCD file using MediaStore.")
+        } else {
+            Log.e(TAG, "Failed to create URI for saving PCD file.")
+        }
+    }
+
+    /**
+     * Creating a link to the DOCUMENTS/PCD folder on an Android device
+     *      * and granting permission to save.
+     *      * return: Uri - A link to the location where the PCD is saved.
+     *  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+     * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+     */
+    private fun createModelUriPcd(fileName: String): Uri? {
+        val values = ContentValues().apply {
+            put(MediaStore.Files.FileColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.Files.FileColumns.MIME_TYPE, "application/octet-stream")
+            put(MediaStore.Files.FileColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS + "/PCD")
+        }
+
+        return contentResolver.insert(MediaStore.Files.getContentUri("external"), values)
+    }
 
 
+    /**
+     * Converting all current points in the point buffer from `savedPoints`
+     * captured by the device's camera into a format suitable for processing
+     * by the native library, `Array<FloatArray>`,
+     * and calling the main method that works with the native library.
+     *  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+     * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+     */
+    private fun preparePointsForModel() {
+        val totalPoints = savedPoints.sumBy { it.capacity() / 3 }
+        pointArrays = Array(totalPoints) { FloatArray(3) }
 
+        var index = 0
+        savedPoints.forEach { points ->
+            val pointCount = points.capacity() / 3
+            for (i in 0 until pointCount) {
+                pointArrays[index][0] = points.get(i * 3)
+                pointArrays[index][1] = points.get(i * 3 + 1)
+                pointArrays[index][2] = points.get(i * 3 + 2)
+                index++
+            }
+        }
+
+        val fileName =  generateFileName("model","obj")
+        saveModelToUri(fileName)
+    }
+    /**
+     * Generating a random name for files.
+     * You need to provide the initial name and format.
+     *  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+     * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
+     */
+    private fun generateFileName(prefix: String, extension: String): String {
+        val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+        val currentDate = dateFormat.format(Date())
+
+        val randomHash = UUID.randomUUID().toString().take(8)
+
+        return "$prefix${currentDate}_$randomHash.$extension"
+    }
 
 
 
@@ -757,11 +476,8 @@ private fun createModelUri(fileName: String): Uri? {
     /**********************************
      * ********************************
      * ********************************
-     *Point cloud save obj test
+     *Saving points
      */
-
-
-
     private fun fixatePoints() {
         val points = currentPoints ?: return
         val filteredPoints = filterInvalidPoints(points)
