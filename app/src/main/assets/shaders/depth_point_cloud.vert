@@ -53,10 +53,31 @@ vec3 PerceptColormap(in float x) {
 
 void main() {
    // Colors the pointcloud by height.
-   float kMinHeightMeters = -2.0f;
-   float kMaxHeightMeters = 2.0f;
-   float normalizedHeight = clamp((a_Position.y - kMinHeightMeters) / (kMaxHeightMeters - kMinHeightMeters), 0.0, 1.0);
+   float kMinHeightMeters = -0.3f;
+   float kMaxHeightMeters = 0.3f;
+   float normalizedHeight = clamp((a_Position.z - kMinHeightMeters) / (kMaxHeightMeters - kMinHeightMeters), 0.0, 1.0);
    v_Color = vec4(PerceptColormap(normalizedHeight), 1.0);
    gl_Position = u_ModelViewProjection * vec4(a_Position.xyz, 1.0);
    gl_PointSize = u_PointSize;
 }
+//uniform mat4 u_ModelViewProjection;
+//uniform float u_PointSize;
+//
+//attribute vec4 a_Position;
+//
+//varying vec4 v_Color;
+//
+//void main() {
+//    // Окрашиваем на основе координаты Z
+//    float depthValue = a_Position.z;
+//
+//    // Нормализуем глубину для диапазона [-1, 1] в диапазон [0, 1]
+//    float normalizedDepth = (depthValue + 1.0) / 2.0;
+//
+//    // Используем цветовую интерполяцию от синего (близко) до красного (далеко)
+//    v_Color = vec4(normalizedDepth, 0.0, 1.0 - normalizedDepth, 1.0);
+//
+//    // Применяем модельно-видовую-проекционную матрицу
+//    gl_Position = u_ModelViewProjection * a_Position;
+//    gl_PointSize = u_PointSize;
+//}

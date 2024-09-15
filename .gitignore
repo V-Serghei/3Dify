@@ -17,3 +17,6 @@ local.properties
 # Project exclude paths
 /viewerapp/build/
 /viewerapp/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/
+/pclibrarycpp/build/
+/pclibrarycpp/conan_env/bin/
+/pclibrarycpp/venv/bin/
