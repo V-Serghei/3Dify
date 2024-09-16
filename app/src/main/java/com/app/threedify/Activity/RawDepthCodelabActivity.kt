@@ -174,7 +174,7 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         /**
          * ********************************
          * ********************************
-         *Saving points from the file point.txt
+         * Saving points from the file point.txt
          * Generation of a model based on this data.
          */
         placeholderButton2.setOnClickListener{
