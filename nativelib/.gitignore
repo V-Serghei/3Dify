@@ -1,2 +1,4 @@
 /build
-
+/src/main/cpp/pclib/jniLibs/arm64-v8a/pcl/lib
+/src/main/cpp/pclib/jniLibs/arm64-v8a/pcl/lib/
+*.zip.*
