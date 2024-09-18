@@ -797,6 +797,9 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                         val confidence = points.get()
 
                         //x y z confidence
+                        if(x == 0.0f && y == 0.0f && z == 0.0f && confidence == 0.0f){
+                            continue
+                        }
                         cordsTxt.append("$x $y $z $confidence\n")
                     }
 
