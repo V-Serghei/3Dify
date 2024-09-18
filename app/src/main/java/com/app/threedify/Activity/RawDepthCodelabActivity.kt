@@ -125,6 +125,12 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
      *Button fixed point cloud
      * **********************************
      */
+
+
+
+    //-------------------
+    //private val externalFile = File(getExternalFilesDir(null), "cords.txt")
+    //-------------------
     private var planesFiltringEnable = true
 
     @SuppressLint("MissingInflatedId")
@@ -250,6 +256,12 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
          * ********************************
          *Button test
          */
+
+
+        //------------------
+        val externalFile = File(getExternalFilesDir(null), "cords.txt")
+        externalFile.writeText(" ")
+        //------------------
 
     }
 
@@ -804,7 +816,7 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                     }
 
                     val externalFile = File(getExternalFilesDir(null), "cords.txt")
-                    externalFile.writeText(cordsTxt.toString())
+                    externalFile.appendText(cordsTxt.toString())
                     //---------------------------------------------
 
 
