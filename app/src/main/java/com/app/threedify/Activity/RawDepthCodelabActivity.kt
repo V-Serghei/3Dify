@@ -785,6 +785,27 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                         depthRenderer.update(savedPointBuffer)
                         depthRenderer.draw(camera)
                     }
+
+
+                    //---------------------------------------------
+                    val cordsTxt: StringBuilder = StringBuilder("")
+
+                    while (points.hasRemaining()) {
+                        val x = points.get()
+                        val y = points.get()
+                        val z = points.get()
+                        val confidence = points.get()
+
+                        //x y z confidence
+                        cordsTxt.append("$x $y $z $confidence\n")
+                    }
+
+                    val externalFile = File(getExternalFilesDir(null), "cords.txt")
+                    externalFile.writeText(cordsTxt.toString())
+                    //---------------------------------------------
+
+
+
                     // Visualize depth points.
                     depthRenderer.update(points)
                     depthRenderer.draw(camera)
