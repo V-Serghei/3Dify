@@ -68,6 +68,10 @@ class MainActivity : AppCompatActivity() {
         ////////////////////////////////////////////////////////////////
         ///for interface!!
 
+        if (!Python.isStarted()) {
+            Python.start(AndroidPlatform(this))
+        }
+
         // initialize views
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -89,10 +93,7 @@ class MainActivity : AppCompatActivity() {
 
         // Optional: Uncomment to initialize 3D viewer
         // initialize3DViewer()
-        if (!Python.isStarted()) {
-            Python.start(AndroidPlatform(this))
-        }
-        val python = Python.getInstance()
+
     }
 
 
