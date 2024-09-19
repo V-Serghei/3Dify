@@ -26,6 +26,7 @@ import com.app.threedify.databinding.FragmentGalleryBinding
 import com.app.threedify.manager.ObjFileSearchManager
 import com.app.threedify.ui.gallery.helpers.ObjFile
 import com.app.threedify.ui.gallery.helpers.ObjFileAdapter
+import com.chaquo.python.Python
 import org.the3deer.app.model3D.view.ModelActivity
 import java.io.File
 import java.util.Date
@@ -168,10 +169,10 @@ class GalleryFragment<LinearLayout> : Fragment() {
         builder.setItems(options.toTypedArray()) { dialog, which ->
             when (options[which]) {
                 "View model" -> initialize3DViewer(selectedFile.path)
-                "Convert to .obj" -> forConverterChosen(selectedFile.path, fileExtension, "obj")
-                "Convert to .stl" -> forConverterChosen(selectedFile.path, fileExtension, "stl")
-                "Convert to .blend" -> forConverterChosen(selectedFile.path, fileExtension, "blend")
-                "Convert to .3ds" -> forConverterChosen(selectedFile.path, fileExtension, "3ds")
+                "Convert to .obj" -> forConverterChosen(selectedFile.path, ".$fileExtension", ".obj")
+                "Convert to .stl" -> forConverterChosen(selectedFile.path, ".$fileExtension", ".stl")
+                "Convert to .blend" -> forConverterChosen(selectedFile.path, ".$fileExtension", ".blend")
+                "Convert to .3ds" -> forConverterChosen(selectedFile.path, ".$fileExtension", ".3ds")
             }
         }
 
@@ -220,5 +221,10 @@ class GalleryFragment<LinearLayout> : Fragment() {
     }
     fun forConverterChosen(filePath: String, fromExtension: String, toExtension: String){
         Toast.makeText(requireContext(), "from: ${fromExtension}, to: ${toExtension}", Toast.LENGTH_SHORT).show()
+        val downloadsFolder = context?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)?.absolutePath
+        val pInstance = Python.getInstance()
+        val pModule = pInstance.getModule("Converter3D")
+        val msg = pModule.callAttr("convert_3d_model", filePath, fromExtension, toExtension, "/storage/emulated/0/download").toString()
+        Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
     }
 }
