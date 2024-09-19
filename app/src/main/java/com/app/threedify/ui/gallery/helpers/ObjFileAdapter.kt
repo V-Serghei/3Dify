@@ -8,11 +8,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.app.threedify.R
 
-data class ObjFile(val name: String, val path: String, val size: String, val date: String)
+data class ObjFile(val name: String, val path: String, val size: String, val date: String, val extension: String)
 
 class ObjFileAdapter(
     private var objFiles: List<ObjFile>,
-    private val onItemClick: (ObjFile) -> Unit
+    private val onItemClick: (ObjFile, View) -> Unit
 ) : RecyclerView.Adapter<ObjFileAdapter.ObjFileViewHolder>() {
 
     class ObjFileViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -30,12 +30,17 @@ class ObjFileAdapter(
     override fun onBindViewHolder(holder: ObjFileViewHolder, position: Int) {
         val objFile = objFiles[position]
         holder.fileName.text = objFile.name
-        holder.fileIcon.setImageResource(R.drawable.file_pdf)
+        when (objFile.extension) {
+            "obj" -> holder.fileIcon.setImageResource(R.drawable.file_obj)
+            "stl" -> holder.fileIcon.setImageResource(R.drawable.file_stl)
+            "blend" -> holder.fileIcon.setImageResource(R.drawable.file_blend)
+            "3ds" -> holder.fileIcon.setImageResource(R.drawable.file_tds)
+        }
         holder.fileSize.text = "Size: ${objFile.size}"
         holder.fileDate.text = objFile.date
 
         holder.itemView.setOnClickListener {
-            onItemClick(objFile)
+            onItemClick(objFile, holder.itemView)
         }
     }
 
