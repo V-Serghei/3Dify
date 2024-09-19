@@ -196,6 +196,7 @@ class GalleryFragment<LinearLayout> : Fragment() {
             "$sizeInKB KB"
         }
     }
+
     private fun initialize3DViewer(filePath: String) {
         val fileUri = Uri.fromFile(File(filePath))
 
