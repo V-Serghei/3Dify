@@ -9,7 +9,8 @@ class FileSystemIObjScanner : IObjFileScanner {
         directories.forEach { directory ->
             if (directory.isDirectory) {
                 directory.walkTopDown().forEach { file ->
-                    if (file.extension.equals("obj", ignoreCase = true)) {
+                    if (file.extension.equals("obj", ignoreCase = true)||file.extension.equals("stl", ignoreCase = true)
+                        ||file.extension.equals("3ds", ignoreCase = true)||file.extension.equals("blend", ignoreCase = true)) {
                         objFiles.add(file)
                     }
                 }

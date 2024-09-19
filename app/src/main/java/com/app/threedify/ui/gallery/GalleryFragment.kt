@@ -1,5 +1,6 @@
 package com.app.threedify.ui.gallery
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
@@ -9,6 +10,7 @@ import android.os.Environment
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -98,13 +100,16 @@ class GalleryFragment<LinearLayout> : Fragment() {
 
         val galleryViewModel = ViewModelProvider(this)[GalleryViewModel::class.java]
 
-        ///////////NICHITAAAAAAAAAAAAA
-        ///////////In this lambda, you can specify what you want when you press (where I make the toastik.)
-        adapter = ObjFileAdapter(emptyList()) { selectedFile ->
-            Toast.makeText(requireContext(), " Chosen file: ${selectedFile.name}", Toast.LENGTH_SHORT).show()
-            initialize3DViewer(selectedFile.path)
-            //alternative initializing variant
-            //ObjectViewer.view(requireContext(), File(selectedFile.path))
+///////////In this lambda, you can specify what you want when you press
+//        adapter = ObjFileAdapter(emptyList()) { selectedFile ->
+//            Toast.makeText(requireContext(), " Chosen file: ${selectedFile.name}", Toast.LENGTH_SHORT).show()
+//            initialize3DViewer(selectedFile.path)
+//
+//            //alternative initializing variant
+//            //ObjectViewer.view(requireContext(), File(selectedFile.path))
+//        }
+        adapter = ObjFileAdapter(emptyList()) { selectedFile, view ->
+            showDialogMenu(selectedFile, view)
         }
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 2) // Two items per row
@@ -139,9 +144,46 @@ class GalleryFragment<LinearLayout> : Fragment() {
         val objFiles = fileSearchManager.findObjFiles(directories).map {
             val size = getFileSize(it)
             val date = getFileCreationDate(it)
-            ObjFile(it.name, it.path, size, date)
+            ObjFile(it.name, it.path, size, date, it.extension.lowercase())
         }
         galleryViewModel.updateObjFiles(objFiles)
+    }
+
+    private fun showDialogMenu(selectedFile: ObjFile, view: View) {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Choose action:")
+
+        val options = mutableListOf<String>()
+
+        if (selectedFile.extension == "obj") {
+            options.add("View model")
+        }
+
+        val fileExtension = selectedFile.extension
+        if (fileExtension != "obj") options.add("Convert to .obj")
+        if (fileExtension != "stl") options.add("Convert to .stl")
+        if (fileExtension != "blend") options.add("Convert to .blend")
+        if (fileExtension != "3ds") options.add("Convert to .3ds")
+
+        builder.setItems(options.toTypedArray()) { dialog, which ->
+            when (options[which]) {
+                "View model" -> initialize3DViewer(selectedFile.path)
+                "Convert to .obj" -> forConverterChosen(selectedFile.path, fileExtension, "obj")
+                "Convert to .stl" -> forConverterChosen(selectedFile.path, fileExtension, "stl")
+                "Convert to .blend" -> forConverterChosen(selectedFile.path, fileExtension, "blend")
+                "Convert to .3ds" -> forConverterChosen(selectedFile.path, fileExtension, "3ds")
+            }
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+
+        val location = IntArray(2)
+        view.getLocationOnScreen(location)
+        val window = dialog.window
+        window?.setGravity(Gravity.TOP or Gravity.START)
+        window?.attributes?.x = location[0]
+        window?.attributes?.y = location[1]
     }
 
     fun getFileSize(file: File): String {
@@ -174,5 +216,8 @@ class GalleryFragment<LinearLayout> : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+    fun forConverterChosen(filePath: String, fromExtension: String, toExtension: String){
+        Toast.makeText(requireContext(), "from: ${fromExtension}, to: ${toExtension}", Toast.LENGTH_SHORT).show()
     }
 }

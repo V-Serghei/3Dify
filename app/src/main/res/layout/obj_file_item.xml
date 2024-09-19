@@ -14,7 +14,7 @@
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_gravity="center"
-        android:src="@drawable/file_pdf"
+        android:src="@drawable/file_obj"
         app:tint="?attr/colorOnPrimary" />
 
     <TextView
