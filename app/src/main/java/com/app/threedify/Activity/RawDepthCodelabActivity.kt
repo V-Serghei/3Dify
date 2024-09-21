@@ -129,8 +129,13 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
 
 
     //-------------------
-    //private val externalFile = File(getExternalFilesDir(null), "cords.txt")
+
+    private val pointsMap = hashMapOf<Int, Float>()
+
     //-------------------
+
+
+
     private var planesFiltringEnable = true
 
     @SuppressLint("MissingInflatedId")
@@ -800,6 +805,12 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
 
 
                     //---------------------------------------------
+
+
+
+
+
+                    //---------------------------------------------
                     val cordsTxt: StringBuilder = StringBuilder("")
 
                     while (points.hasRemaining()) {
@@ -845,6 +856,46 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         } catch (t: Throwable) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t)
+        }
+    }
+
+    private fun pointsMapUpdate(points : FloatBuffer){
+
+        while (points.hasRemaining()) {
+            var mKey : Int = 0
+
+            val x = points.get()
+            val y = points.get()
+            val z = points.get()
+            val confidence = points.get()
+
+            //x y z confidence
+            if(x == 0.0f && y == 0.0f && z == 0.0f && confidence == 0.0f){
+                continue
+            }
+
+            if(x > 0.0f){ mKey += (x * 100000000).toInt() }
+            else        { mKey += ((-x + 500) * 100000000).toInt() }
+            if(y > 0.0f){ mKey += (y * 100000).toInt() }
+            else        { mKey += ((-y + 500) * 100000).toInt() }
+            if(z > 0.0f){ mKey += (z * 100).toInt() }
+            else        { mKey += ((-z + 500) * 100).toInt() }
+
+            //if(pointsMap.containsKey(mKey)){
+            //    if(pointsMap.get(mKey)!! < confidence){
+            //        pointsMap.put(mKey, confidence)
+            //    }
+            //}
+
+            pointsMap[mKey]?.let { existingConfidence ->
+                if (existingConfidence < confidence) {
+                    pointsMap[mKey] = confidence
+                }
+            } ?: run {
+                pointsMap[mKey] = confidence
+            }
+
+            points.rewind()
         }
     }
 

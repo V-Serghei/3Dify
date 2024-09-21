@@ -29,6 +29,7 @@ import java.nio.FloatBuffer
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.sqrt
+import kotlin.math.round
 
 /**
  * Converts depth data from ARCore depth images to 3D pointclouds. Points are added by calling the
@@ -158,9 +159,9 @@ object DepthData {
 
                 // Applies model matrix to transform point into world coordinates.
                 Matrix.multiplyMV(pointWorld, 0, modelMatrix, 0, pointCamera, 0)
-                points.put(pointWorld[0]) // X.
-                points.put(pointWorld[1]) // Y.
-                points.put(pointWorld[2]) // Z.
+                points.put( round(pointWorld[0] * 100) / 100 ) // X.
+                points.put( round(pointWorld[1] * 100) / 100 ) // Y.
+                points.put( round(pointWorld[2] * 100) / 100 ) // Z.
                 points.put(confidenceNormalized)
                 x += step
             }
