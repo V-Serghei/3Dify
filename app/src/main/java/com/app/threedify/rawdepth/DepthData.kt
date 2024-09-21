@@ -44,7 +44,7 @@ object DepthData {
 
 
 
-    fun create(frame: Frame, cameraPoseAnchor: Anchor): FloatBuffer? {
+    fun create(frame: Frame, poseAnchor: Anchor): FloatBuffer? {
         try {
             val depthImage = frame.acquireRawDepthImage16Bits()
             val confidenceImage = frame.acquireRawDepthConfidenceImage()
@@ -53,10 +53,10 @@ object DepthData {
             // corresponding to the depth image. See more information about the depth values at
             // https://developers.google.com/ar/develop/java/depth/overview#understand-depth-values.
             val intrinsics = frame.camera.textureIntrinsics
-            val modelMatrix = FloatArray(16)
-            cameraPoseAnchor.pose.toMatrix(modelMatrix, 0)
+            val anchorMatrix = FloatArray(16)
+            poseAnchor.pose.toMatrix(anchorMatrix, 0)
             val points = convertRawDepthImagesTo3dPointBuffer(
-                depthImage, confidenceImage, intrinsics, modelMatrix
+                depthImage, confidenceImage, intrinsics, anchorMatrix
             )
 
             depthImage.close()
@@ -157,12 +157,14 @@ object DepthData {
                 pointCamera[2] = -depthMeters
                 pointCamera[3] = 1f
 
+
                 // Applies model matrix to transform point into world coordinates.
                 Matrix.multiplyMV(pointWorld, 0, modelMatrix, 0, pointCamera, 0)
-                points.put( round(pointWorld[0] * 100) / 100 ) // X.
-                points.put( round(pointWorld[1] * 100) / 100 ) // Y.
-                points.put( round(pointWorld[2] * 100) / 100 ) // Z.
-                points.put(confidenceNormalized)
+
+                points.put(round(pointWorld[0] * 100) / 100) // X.
+                points.put(round(pointWorld[1] * 100) / 100) // Y.
+                points.put(round(pointWorld[2] * 100) / 100) // Z.
+                points.put(round(confidenceNormalized * 100) / 100) // C.
                 x += step
             }
             y += step

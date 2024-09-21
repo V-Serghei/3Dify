@@ -47,6 +47,7 @@ import com.google.ar.core.ArCoreApk.InstallStatus
 import com.google.ar.core.Config
 import com.google.ar.core.Plane
 import com.google.ar.core.Pose
+import com.google.ar.core.Anchor
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import com.google.ar.core.codelab.common.rendering.BackgroundRenderer
@@ -102,6 +103,7 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     private lateinit var placeholderButton2: Button
     private lateinit var placeholderButton3: Button
     private lateinit var pointFixationButton: Button
+    private lateinit var pointsConfidencePerc: TextView
 
     /**********************************
      * ********************************
@@ -131,7 +133,10 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     //-------------------
 
     private val pointsMap = hashMapOf<Int, Float>()
-
+    private var pointsBuffer = ArrayList<Float>()
+    private var needToBeProcessed : Boolean = false
+    private var CSAnchorSet : Boolean = false
+    private lateinit var CSAnchor: Anchor
     //-------------------
 
 
@@ -171,6 +176,7 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         placeholderButton2 = findViewById(R.id.testButton2)
         placeholderButton3 = findViewById(R.id.testButton3)
         pointFixationButton = findViewById(R.id.point_fixation)
+        pointsConfidencePerc = findViewById(R.id.points_conf)
 
         toggleModeButtonCamera.setOnClickListener { toggleMode() }
         togglePlanesFilteringButton.setOnClickListener { togglePlanesFiltering() }
@@ -180,7 +186,15 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
          *  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
          * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
          */
-        placeholderButton1.setOnClickListener{ /**here will be called the method that you add here*/}
+        placeholderButton1.setOnClickListener{
+            if(!needToBeProcessed){
+                needToBeProcessed = true
+            }
+            else{
+                needToBeProcessed = false
+                createFileFromMap()
+            }
+        }
 
         /**
          * ********************************
@@ -266,6 +280,9 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         //------------------
         val externalFile = File(getExternalFilesDir(null), "cords.txt")
         externalFile.writeText(" ")
+
+
+
         //------------------
 
     }
@@ -769,95 +786,164 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         // the video background can be properly adjusted.
         displayRotationHelper?.updateSessionIfNeeded(session!!)
 
-        try {
-            session!!.setCameraTextureName(backgroundRenderer.textureId)
 
-            // Obtain the current frame from ARSession. When the configuration is set to
-            // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
-            // camera framerate.
-            val frame = session!!.update()
-            val camera = frame.camera
+        if(needToBeProcessed) {
+            try {
+                session!!.setCameraTextureName(backgroundRenderer.textureId)
 
-            // If frame is ready, render camera preview image to the GL surface.
-            backgroundRenderer.draw(frame)
+                // Obtain the current frame from ARSession. When the configuration is set to
+                // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
+                // camera framerate.
+                val frame = session!!.update()
+                val camera = frame.camera
 
-            //If the raw depth mode chosen, visualize depth points
-            if (currentMode == Mode.RAW_DEPTH) {
-                // Retrieve the depth data for this frame.
-                val points: FloatBuffer =
-                    DepthData.create(frame, session!!.createAnchor(camera.pose)) ?: return
+                // If frame is ready, render camera preview image to the GL surface.
+                backgroundRenderer.draw(frame)
 
-                if (points != null) {
-                    currentPoints = points
-                    cameraPoseCurrent = camera.pose
-
-                    // Filters the depth data.
-                    if (planesFiltringEnable) {
-                        DepthData.filterUsingPlanes(
-                            points,
-                            session!!.getAllTrackables(Plane::class.java)
-                        )
-                    }
-                    for (savedPointBuffer in savedPoints) {
-                        depthRenderer.update(savedPointBuffer)
-                        depthRenderer.draw(camera)
-                    }
-
-
-                    //---------------------------------------------
-
-
-
-
-
-                    //---------------------------------------------
-                    val cordsTxt: StringBuilder = StringBuilder("")
-
-                    while (points.hasRemaining()) {
-                        val x = points.get()
-                        val y = points.get()
-                        val z = points.get()
-                        val confidence = points.get()
-
-                        //x y z confidence
-                        if(x == 0.0f && y == 0.0f && z == 0.0f && confidence == 0.0f){
-                            continue
+                //If the raw depth mode chosen, visualize depth points
+                if (currentMode == Mode.RAW_DEPTH) {
+                    // Retrieve the depth data for this frame.
+                    if(!CSAnchorSet){
+                        // Main coordinate system anchor
+                        //val CSAnchorPose = Pose.makeTranslation(20f, 56f, 20f)
+                        if(session!=null) {
+                            CSAnchor = session!!.createAnchor(camera.pose)
                         }
-                        cordsTxt.append("$x $y $z $confidence\n")
+                        CSAnchorSet = true
+                    }
+                    if(CSAnchorSet) {
+                        val points: FloatBuffer =
+                            DepthData.create(frame, CSAnchor) ?: return
+                        //DepthData.create(frame, session!!.createAnchor(camera.pose)) ?: return
+
+                        if (points != null) {
+                            currentPoints = points
+                            cameraPoseCurrent = camera.pose
+
+                            // Filters the depth data.
+                            if (planesFiltringEnable) {
+                                DepthData.filterUsingPlanes(
+                                    points,
+                                    session!!.getAllTrackables(Plane::class.java)
+                                )
+                            }
+                            for (savedPointBuffer in savedPoints) {
+                                depthRenderer.update(savedPointBuffer)
+                                depthRenderer.draw(camera)
+                            }
+
+
+                            //---------------------------------------------
+
+                            //pointsMapUpdate(points)
+                            var accum = 0.0f
+                            var counter = 0
+                            while (points.hasRemaining()) {
+                                val x = points.get()
+                                val y = points.get()
+                                val z = points.get()
+                                val confidence = points.get()
+
+                                //x y z confidence
+                                if (x == 0.0f && y == 0.0f && z == 0.0f && confidence == 0.0f) {
+                                    continue
+                                }
+                                pointsBuffer.add(x)
+                                pointsBuffer.add(y)
+                                pointsBuffer.add(z)
+                                pointsBuffer.add(confidence)
+
+                                counter = +1
+                                accum += confidence
+                            }
+
+
+                            var confidencePercentage = accum / counter
+                            //var confidencePercentage = 8
+
+                            pointsConfidencePerc.text = "CP : ${confidencePercentage}"
+
+                            //---------------------------------------------
+                            //val cordsTxt: StringBuilder = StringBuilder("")
+//
+                            //while (points.hasRemaining()) {
+                            //    val x = points.get()
+                            //    val y = points.get()
+                            //    val z = points.get()
+                            //    val confidence = points.get()
+//
+                            //    //x y z confidence
+                            //    if(x == 0.0f && y == 0.0f && z == 0.0f && confidence == 0.0f){
+                            //        continue
+                            //    }
+                            //    cordsTxt.append("$x $y $z $confidence\n")
+                            //}
+//
+                            //val externalFile = File(getExternalFilesDir(null), "cords.txt")
+                            //externalFile.appendText(cordsTxt.toString())
+                            //---------------------------------------------
+
+
+                            // Visualize depth points.
+                            depthRenderer.update(points)
+                            depthRenderer.draw(camera)
+                        }
                     }
 
-                    val externalFile = File(getExternalFilesDir(null), "cords.txt")
-                    externalFile.appendText(cordsTxt.toString())
-                    //---------------------------------------------
+                    // If not tracking, show tracking failure reason instead.
+                    if (camera.trackingState == TrackingState.PAUSED) {
+                        messageSnackbarHelper.showMessage(
+                            this, TrackingStateHelper.getTrackingFailureReasonString(camera)
+                        )
+                        return
+                    }
 
-
-
-                    // Visualize depth points.
-                    depthRenderer.update(points)
-                    depthRenderer.draw(camera)
-                }
-
-                // If not tracking, show tracking failure reason instead.
-                if (camera.trackingState == TrackingState.PAUSED) {
-                    messageSnackbarHelper.showMessage(
-                        this, TrackingStateHelper.getTrackingFailureReasonString(camera)
-                    )
-                    return
-                }
-
-                //If you want drawn boxes uncomment
+                    //If you want drawn boxes uncomment
 //            // Draw boxes around clusters of points.
 //            val clusteringHelper: PointClusteringHelper = PointClusteringHelper(points)
 //            val clusters: List<AABB> = clusteringHelper.findClusters()
 //            for (aabb in clusters) {
 //                boxRenderer.draw(aabb, camera)
 //            }
+                }
+            } catch (t: Throwable) {
+                // Avoid crashing the application due to unhandled exceptions.
+                Log.e(TAG, "Exception on the OpenGL thread", t)
             }
-        } catch (t: Throwable) {
-            // Avoid crashing the application due to unhandled exceptions.
-            Log.e(TAG, "Exception on the OpenGL thread", t)
         }
     }
+
+    private fun createFileFromMap(){
+        val cordsTxt: StringBuilder = StringBuilder("")
+
+        //for ((key, value) in pointsMap) {
+        //    var tmp = ((key % 1000) / 100)
+        //    val z = if (tmp > 5) (-tmp).toFloat() else (tmp).toFloat()
+        //    tmp = (((key / 1000) % 1000) / 100)
+        //    val y = if (tmp > 5) (-tmp).toFloat() else (tmp).toFloat()
+        //    tmp = ((key / 1000000) / 100)
+        //    val x = if (tmp > 5) (-tmp).toFloat() else (tmp).toFloat()
+//
+        //    cordsTxt.append("$x $y $z $value\n")
+        //}
+        var counterF = 0
+        var i = 0
+        while ((i + 4) < pointsBuffer.size) {
+            val x = pointsBuffer[i]
+            val y = pointsBuffer[i+1]
+            val z = pointsBuffer[i+2]
+            val confidence = pointsBuffer[i+3]
+
+            cordsTxt.append("$x $y $z $confidence\n")
+            i += 4
+        }
+
+            val externalFile = File(getExternalFilesDir(null), "cords.txt")
+        externalFile.appendText(cordsTxt.toString())
+
+    }
+
+    private fun floatBuffer() = pointsBuffer
 
     private fun pointsMapUpdate(points : FloatBuffer){
 
