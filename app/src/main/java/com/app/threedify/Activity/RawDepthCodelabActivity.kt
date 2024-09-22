@@ -130,13 +130,21 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
 
 
 
-    //-------------------
+    //------------------- maxPointsAmount
+
+    private val maxPointsAmount = 2000000
 
     private val pointsMap = hashMapOf<Int, Float>()
-    private var pointsBuffer = ArrayList<Float>()
+    private var pointsArray = ArrayList<Float>()
+    private val pointsMatrixV = Array(400) { Array(400) { FloatArray(400) { 0.0f } } }
+    private val pointsMatrixK = Array(400) { Array(400) { BooleanArray(400) { false } } }
+    private var pointsCounterM : Int = 0
+
+
     private var needToBeProcessed : Boolean = false
     private var CSAnchorSet : Boolean = false
     private lateinit var CSAnchor: Anchor
+
     //-------------------
 
 
@@ -192,7 +200,9 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             }
             else{
                 needToBeProcessed = false
-                createFileFromMap()
+                //createFileFromArray()
+                //createFileFromMap()
+                createFileFromMatrix()
             }
         }
 
@@ -811,13 +821,13 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                         }
                         CSAnchorSet = true
                     }
-                    if(CSAnchorSet) {
+                    if(CSAnchorSet && pointsCounterM < maxPointsAmount) {
                         val points: FloatBuffer =
                             DepthData.create(frame, CSAnchor) ?: return
                         //DepthData.create(frame, session!!.createAnchor(camera.pose)) ?: return
 
                         if (points != null) {
-                            currentPoints = points
+                            //currentPoints = points
                             cameraPoseCurrent = camera.pose
 
                             // Filters the depth data.
@@ -836,53 +846,19 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                             //---------------------------------------------
 
                             //pointsMapUpdate(points)
-                            var accum = 0.0f
-                            var counter = 0
-                            while (points.hasRemaining()) {
-                                val x = points.get()
-                                val y = points.get()
-                                val z = points.get()
-                                val confidence = points.get()
+                            pointsMatrixUpdate(points)
+                            //pointsArrayUpdate(points)
 
-                                //x y z confidence
-                                if (x == 0.0f && y == 0.0f && z == 0.0f && confidence == 0.0f) {
-                                    continue
-                                }
-                                pointsBuffer.add(x)
-                                pointsBuffer.add(y)
-                                pointsBuffer.add(z)
-                                pointsBuffer.add(confidence)
-
-                                counter = +1
-                                accum += confidence
-                            }
+                            //var accum = 0.0f
+                            //var counter = 0
 
 
-                            var confidencePercentage = accum / counter
+                            //var confidencePercentage = accum / counter
                             //var confidencePercentage = 8
 
-                            pointsConfidencePerc.text = "CP : ${confidencePercentage}"
-
+                            //pointsConfidencePerc.text = "CP : ${confidencePercentage * 100}%"
+                            pointsConfidencePerc.text = "P : ${pointsCounterM}"
                             //---------------------------------------------
-                            //val cordsTxt: StringBuilder = StringBuilder("")
-//
-                            //while (points.hasRemaining()) {
-                            //    val x = points.get()
-                            //    val y = points.get()
-                            //    val z = points.get()
-                            //    val confidence = points.get()
-//
-                            //    //x y z confidence
-                            //    if(x == 0.0f && y == 0.0f && z == 0.0f && confidence == 0.0f){
-                            //        continue
-                            //    }
-                            //    cordsTxt.append("$x $y $z $confidence\n")
-                            //}
-//
-                            //val externalFile = File(getExternalFilesDir(null), "cords.txt")
-                            //externalFile.appendText(cordsTxt.toString())
-                            //---------------------------------------------
-
 
                             // Visualize depth points.
                             depthRenderer.update(points)
@@ -916,26 +892,15 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     private fun createFileFromMap(){
         val cordsTxt: StringBuilder = StringBuilder("")
 
-        //for ((key, value) in pointsMap) {
-        //    var tmp = ((key % 1000) / 100)
-        //    val z = if (tmp > 5) (-tmp).toFloat() else (tmp).toFloat()
-        //    tmp = (((key / 1000) % 1000) / 100)
-        //    val y = if (tmp > 5) (-tmp).toFloat() else (tmp).toFloat()
-        //    tmp = ((key / 1000000) / 100)
-        //    val x = if (tmp > 5) (-tmp).toFloat() else (tmp).toFloat()
-//
-        //    cordsTxt.append("$x $y $z $value\n")
-        //}
-        var counterF = 0
-        var i = 0
-        while ((i + 4) < pointsBuffer.size) {
-            val x = pointsBuffer[i]
-            val y = pointsBuffer[i+1]
-            val z = pointsBuffer[i+2]
-            val confidence = pointsBuffer[i+3]
+        for ((key, value) in pointsMap) {
+            var tmp = ((key % 1000) / 100)
+            val z = if (tmp > 5) (-tmp).toFloat() else (tmp).toFloat()
+            tmp = (((key / 1000) % 1000) / 100)
+            val y = if (tmp > 5) (-tmp).toFloat() else (tmp).toFloat()
+            tmp = ((key / 1000000) / 100)
+            val x = if (tmp > 5) (-tmp).toFloat() else (tmp).toFloat()
 
-            cordsTxt.append("$x $y $z $confidence\n")
-            i += 4
+            cordsTxt.append("$x $y $z $value\n")
         }
 
             val externalFile = File(getExternalFilesDir(null), "cords.txt")
@@ -943,7 +908,51 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
 
     }
 
-    private fun floatBuffer() = pointsBuffer
+    private fun createFileFromArray(){
+        val cordsTxt: StringBuilder = StringBuilder("")
+
+        var i = 0
+        while ((i + 4) < pointsArray.size) {
+            val x = pointsArray[i]
+            val y = pointsArray[i+1]
+            val z = pointsArray[i+2]
+            val confidence = pointsArray[i+3]
+
+            cordsTxt.append("$x $y $z $confidence\n")
+            i += 4
+        }
+
+        val externalFile = File(getExternalFilesDir(null), "cords.txt")
+        externalFile.appendText(cordsTxt.toString())
+
+    }
+
+    private fun createFileFromMatrix(){
+        convMatrixBuffer()
+
+        val cordsTxt: StringBuilder = StringBuilder("")
+
+        for (i in pointsMatrixK.indices) {
+            for (j in pointsMatrixK[i].indices) {
+                for (k in pointsMatrixK[i][j].indices) {
+                    if(pointsMatrixK[i][j][k]){
+                        val x = if(i > 199){ -((i - 200).toFloat() / 100)} else {(i / 100).toFloat()}
+                        val y = if(j > 199){ -((j - 200).toFloat() / 100)} else {(j / 100).toFloat()}
+                        val z = if(k > 199){ -((k - 200).toFloat() / 100)} else {(k / 100).toFloat()}
+                        val confidence = pointsMatrixV[i][j][k]
+
+                        cordsTxt.append("$x $y $z $confidence\n")
+                    }
+                }
+            }
+        }
+
+        val externalFile = File(getExternalFilesDir(null), "cords.txt")
+        externalFile.appendText(cordsTxt.toString())
+
+    }
+
+    private fun floatBuffer() = pointsArray
 
     private fun pointsMapUpdate(points : FloatBuffer){
 
@@ -967,12 +976,6 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             if(z > 0.0f){ mKey += (z * 100).toInt() }
             else        { mKey += ((-z + 500) * 100).toInt() }
 
-            //if(pointsMap.containsKey(mKey)){
-            //    if(pointsMap.get(mKey)!! < confidence){
-            //        pointsMap.put(mKey, confidence)
-            //    }
-            //}
-
             pointsMap[mKey]?.let { existingConfidence ->
                 if (existingConfidence < confidence) {
                     pointsMap[mKey] = confidence
@@ -981,8 +984,75 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                 pointsMap[mKey] = confidence
             }
 
-            points.rewind()
         }
+    }
+
+    private fun pointsArrayUpdate(points : FloatBuffer){
+
+        while (points.hasRemaining()) {
+            val x = points.get()
+            val y = points.get()
+            val z = points.get()
+            val confidence = points.get()
+
+            //x y z confidence
+            if (x == 0.0f && y == 0.0f && z == 0.0f && confidence == 0.0f) {
+                continue
+            }
+            pointsArray.add(x)
+            pointsArray.add(y)
+            pointsArray.add(z)
+            pointsArray.add(confidence)
+
+            pointsCounterM += 1
+            //counter = +1
+            //accum += confidence
+            }
+    }
+
+    private fun pointsMatrixUpdate(points : FloatBuffer){
+        while (points.hasRemaining()) {
+
+            val x = points.get()
+            val y = points.get()
+            val z = points.get()
+            val confidence = points.get()
+
+            //x y z confidence
+            if(x == 0.0f && y == 0.0f && z == 0.0f && confidence == 0.0f){
+                continue
+            }
+
+            val cx = if(x < 0) { (((-x) * 100).toInt() + 200)} else {(x * 100).toInt()}
+            val cy = if(y < 0) { (((-y) * 100).toInt() + 200)} else {(y * 100).toInt()}
+            val cz = if(z < 0) { (((-z) * 100).toInt() + 200)} else {(z * 100).toInt()}
+
+            if(confidence > pointsMatrixV[cx][cy][cz]) {
+                pointsMatrixV[cx][cy][cz] = confidence
+                if(!pointsMatrixK[cx][cy][cz]) {
+                    pointsCounterM += 1
+                }
+                pointsMatrixK[cx][cy][cz] = true
+
+            }
+
+        }
+    }
+
+    private fun convMatrixBuffer(){
+        var buffer : FloatBuffer = FloatBuffer.allocate(3000000)
+        for (i in pointsMatrixK.indices) {
+            for (j in pointsMatrixK[i].indices) {
+                for (k in pointsMatrixK[i][j].indices) {
+                    if(pointsMatrixK[i][j][k]){
+                        buffer.put(if(i > 199){ -((i - 200).toFloat() / 100)} else {(i / 100).toFloat()})
+                        buffer.put(if(j > 199){ -((j - 200).toFloat() / 100)} else {(j / 100).toFloat()})
+                        buffer.put(if(k > 199){ -((k - 200).toFloat() / 100)} else {(k / 100).toFloat()})
+                    }
+                }
+            }
+        }
+        currentPoints = buffer
     }
 
     companion object {
