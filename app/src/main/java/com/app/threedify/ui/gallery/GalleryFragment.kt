@@ -221,7 +221,6 @@ class GalleryFragment<LinearLayout> : Fragment() {
     }
     fun forConverterChosen(filePath: String, fromExtension: String, toExtension: String){
         Toast.makeText(requireContext(), "from: ${fromExtension}, to: ${toExtension}", Toast.LENGTH_SHORT).show()
-        val downloadsFolder = context?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)?.absolutePath
         val pInstance = Python.getInstance()
         val pModule = pInstance.getModule("Converter3D")
         val msg = pModule.callAttr("convert_3d_model", filePath, fromExtension, toExtension, "/storage/emulated/0/download").toString()
