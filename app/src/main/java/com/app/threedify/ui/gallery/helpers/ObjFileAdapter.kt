@@ -33,8 +33,8 @@ class ObjFileAdapter(
         when (objFile.extension) {
             "obj" -> holder.fileIcon.setImageResource(R.drawable.file_obj)
             "stl" -> holder.fileIcon.setImageResource(R.drawable.file_stl)
-            "blend" -> holder.fileIcon.setImageResource(R.drawable.file_blend)
-            "3ds" -> holder.fileIcon.setImageResource(R.drawable.file_tds)
+            "ply" -> holder.fileIcon.setImageResource(R.drawable.file_ply)
+            "off" -> holder.fileIcon.setImageResource(R.drawable.file_off)
         }
         holder.fileSize.text = "Size: ${objFile.size}"
         holder.fileDate.text = objFile.date

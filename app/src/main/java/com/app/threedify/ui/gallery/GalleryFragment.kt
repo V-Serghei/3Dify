@@ -163,16 +163,16 @@ class GalleryFragment<LinearLayout> : Fragment() {
         val fileExtension = selectedFile.extension
         if (fileExtension != "obj") options.add("Convert to .obj")
         if (fileExtension != "stl") options.add("Convert to .stl")
-        if (fileExtension != "blend") options.add("Convert to .blend")
-        if (fileExtension != "3ds") options.add("Convert to .3ds")
+        if (fileExtension != "ply") options.add("Convert to .ply")
+        if (fileExtension != "off") options.add("Convert to .off")
 
         builder.setItems(options.toTypedArray()) { dialog, which ->
             when (options[which]) {
                 "View model" -> initialize3DViewer(selectedFile.path)
                 "Convert to .obj" -> forConverterChosen(selectedFile.path, ".$fileExtension", ".obj")
                 "Convert to .stl" -> forConverterChosen(selectedFile.path, ".$fileExtension", ".stl")
-                "Convert to .blend" -> forConverterChosen(selectedFile.path, ".$fileExtension", ".blend")
-                "Convert to .3ds" -> forConverterChosen(selectedFile.path, ".$fileExtension", ".3ds")
+                "Convert to .ply" -> forConverterChosen(selectedFile.path, ".$fileExtension", ".ply")
+                "Convert to .off" -> forConverterChosen(selectedFile.path, ".$fileExtension", ".off")
             }
         }
 
