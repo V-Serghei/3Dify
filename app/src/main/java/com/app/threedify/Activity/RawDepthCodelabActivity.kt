@@ -98,12 +98,13 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     private lateinit var depthThresholdSeekBar: SeekBar
     private lateinit var confidenceThresholdSeekBar: SeekBar
     private lateinit var buttonIncreaseThreshold: SeekBar
+    private lateinit var amountOfPointsSeekBar: SeekBar
 
-    private lateinit var placeholderButton1: Button
-    private lateinit var placeholderButton2: Button
-    private lateinit var placeholderButton3: Button
-    private lateinit var pointFixationButton: Button
-    private lateinit var pointsConfidencePerc: TextView
+    private lateinit var startScanButton: Button
+    private lateinit var testDataButton: Button
+    private lateinit var createModelButton: Button
+    private lateinit var scanResetButton: Button
+    private lateinit var pointsAmountTextView: TextView
 
     /**********************************
      * ********************************
@@ -132,13 +133,13 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
 
     //------------------- maxPointsAmount
 
-    private val maxPointsAmount = 2000000
+    private var maxPointsAmount = 0
+    private var pointsCounterM : Int = 0
 
     private val pointsMap = hashMapOf<Int, Float>()
     private var pointsArray = ArrayList<Float>()
     private val pointsMatrixV = Array(400) { Array(400) { FloatArray(400) { 0.0f } } }
     private val pointsMatrixK = Array(400) { Array(400) { BooleanArray(400) { false } } }
-    private var pointsCounterM : Int = 0
 
 
     private var needToBeProcessed : Boolean = false
@@ -179,12 +180,13 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         depthThresholdSeekBar = findViewById(R.id.depthThresholdSeekBar)
         confidenceThresholdSeekBar = findViewById(R.id.confidenceThresholdSeekBar)
         buttonIncreaseThreshold = findViewById(R.id.increaseThresholdSeekBar)
+        amountOfPointsSeekBar = findViewById(R.id.amountOfPointsSeekBar)
 
-        placeholderButton1 = findViewById(R.id.testButton1)
-        placeholderButton2 = findViewById(R.id.testButton2)
-        placeholderButton3 = findViewById(R.id.testButton3)
-        pointFixationButton = findViewById(R.id.point_fixation)
-        pointsConfidencePerc = findViewById(R.id.points_conf)
+        startScanButton = findViewById(R.id.testButton1)
+        testDataButton = findViewById(R.id.testButton2)
+        createModelButton = findViewById(R.id.testButton3)
+        scanResetButton = findViewById(R.id.point_reset)
+        pointsAmountTextView = findViewById(R.id.points_amount)
 
         toggleModeButtonCamera.setOnClickListener { toggleMode() }
         togglePlanesFilteringButton.setOnClickListener { togglePlanesFiltering() }
@@ -194,11 +196,10 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
          *  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
          * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
          */
-        placeholderButton1.setOnClickListener{
+        startScanButton.setOnClickListener{
             if(!needToBeProcessed){
                 needToBeProcessed = true
-            }
-            else{
+            }else{
                 needToBeProcessed = false
                 //createFileFromArray()
                 //createFileFromMap()
@@ -212,12 +213,76 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
          * Saving points from the file point.txt
          * Generation of a model based on this data.
          */
-        placeholderButton2.setOnClickListener{
-            pointArrays = loadPointsFromAssets(this, "point.txt")
-            val fileName = generateFileName("model_txt","obj")
-            saveModelToUri(fileName) }
+        testDataButton.setOnClickListener{
+            //pointArrays = loadPointsFromAssets(this, "point.txt")
+            //val fileName = generateFileName("model_txt","obj")
+            //saveModelToUri(fileName)
 
-        placeholderButton3.setOnClickListener {
+            var buffer : FloatBuffer = FloatBuffer.allocate(30)
+
+            buffer.put(0.0f)
+            buffer.put(0.0f)
+            buffer.put(0.0f)
+
+            buffer.put(0.0f)
+            buffer.put(1.0f)
+            buffer.put(0.0f)
+
+            buffer.put(1.0f)
+            buffer.put(1.0f)
+            buffer.put(0.0f)
+
+            buffer.put(1.0f)
+            buffer.put(0.0f)
+            buffer.put(0.0f)
+
+            buffer.put(0.0f)
+            buffer.put(0.0f)
+            buffer.put(1.0f)
+
+            buffer.put(0.0f)
+            buffer.put(1.0f)
+            buffer.put(1.0f)
+
+            buffer.put(1.0f)
+            buffer.put(1.0f)
+            buffer.put(1.0f)
+
+            buffer.put(1.0f)
+            buffer.put(0.0f)
+            buffer.put(1.0f)
+
+
+            val cordsTxt: StringBuilder = StringBuilder("")
+
+            for (i in 0 until 8) {
+                val x = buffer.get(i * 3)
+                val y = buffer.get(i * 3 + 1)
+                val z = buffer.get(i * 3 + 2)
+
+                cordsTxt.append("$x $y $z\n")
+            }
+
+            val externalFile = File(getExternalFilesDir(null), "cords.txt")
+            externalFile.appendText(cordsTxt.toString())
+
+
+            currentPoints = buffer
+
+            fixatePoints()
+            savePointsToPCDFile()
+            preparePointsForModel()
+        }
+
+        createModelButton.setOnClickListener {
+            // Create file with points' cords for tests
+            //createFileFromArray()
+            //createFileFromMap()
+            //createFileFromMatrix()
+
+            // Fixation
+            fixatePoints()
+
             // Saving points to a PCD file.
             savePointsToPCDFile()
 
@@ -225,7 +290,34 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             preparePointsForModel()
         }
 
-        pointFixationButton.setOnClickListener{fixatePoints()}
+        scanResetButton.setOnClickListener{
+            needToBeProcessed = false
+            needToBeProcessed = false
+            CSAnchorSet = false
+
+            pointsCounterM = 0
+
+            pointsMap.clear()
+            pointsArray.clear()
+
+            for (i in pointsMatrixV.indices) {
+                for (j in pointsMatrixV[i].indices) {
+                    for (k in pointsMatrixV[i][j].indices) {
+                        pointsMatrixV[i][j][k] = 0.0f
+                    }
+                }
+            }
+
+            for (i in pointsMatrixK.indices) {
+                for (j in pointsMatrixK[i].indices) {
+                    for (k in pointsMatrixK[i][j].indices) {
+                        pointsMatrixK[i][j][k] = false
+                    }
+                }
+            }
+
+            savedPoints.clear()
+        }
 
         pointsToRenderSeekBar.max = 100000
         pointsToRenderSeekBar.progress = DepthData.maxNumberOfPointsToRender.toInt()
@@ -265,6 +357,17 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 DepthData.planeDist = progress / 100.0f
                 findViewById<TextView>(R.id.increaseThresholdValue).text = (progress/100.0f).toString()
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+
+        amountOfPointsSeekBar.max = 1000000
+        amountOfPointsSeekBar.progress = 400000
+        amountOfPointsSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                maxPointsAmount = progress
+                findViewById<TextView>(R.id.amountOfPointsValue).text = (progress).toString()
             }
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
@@ -423,6 +526,7 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                         writer.write("TYPE F F F\n")
                         writer.write("COUNT 1 1 1\n")
 
+                        //Could be simplified-------------------
                         var totalPoints = 0
                         savedPoints.forEach { points ->
                             totalPoints += points.capacity() / 3
@@ -433,7 +537,9 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                         writer.write("POINTS $totalPoints\n")
                         writer.write("DATA ascii\n")
 
-                        // Record all points
+                        //--------------------------------------
+
+                        // Record all points    ========indexex=======
                         savedPoints.forEach { points ->
                             val pointCount = points.capacity() / 3
                             for (i in 0 until pointCount) {
@@ -494,6 +600,7 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             }
         }
 
+
         val fileName =  generateFileName("model","obj")
         saveModelToUri(fileName)
     }
@@ -527,10 +634,11 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         val filteredPoints = filterInvalidPoints(points)
         if (filteredPoints.capacity() > 0) {
             savedPoints.add(filteredPoints)
-            logPoints(filteredPoints)
-            savePointsToFile(filteredPoints)
+            //logPoints(filteredPoints)
+            //savePointsToFile(filteredPoints)
         }
     }
+
     private fun savePointsToFile(points: FloatBuffer) {
         val fileName = "coordinates_data.txt"
         val file = File(getExternalFilesDir(null), fileName)
@@ -578,18 +686,19 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     }
     private fun filterInvalidPoints(points: FloatBuffer): FloatBuffer {
         val validPoints = mutableListOf<Float>()
-        val pointCount = points.capacity() / 3
+        val pointCount = points.capacity() / 4
 
         for (i in 0 until pointCount) {
-            val x = points.get(i * 3)
-            val y = points.get(i * 3 + 1)
-            val z = points.get(i * 3 + 2)
+            val x = points.get(i * 4)
+            val y = points.get(i * 4 + 1)
+            val z = points.get(i * 4 + 2)
 
-            if (x != 0.0f || y != 0.0f || z != 0.0f) {
+            // Filtration is already done in the code below
+            //if (x != 0.0f || y != 0.0f || z != 0.0f) {
                 validPoints.add(x)
                 validPoints.add(y)
                 validPoints.add(z)
-            }
+            //}
         }
 
         val validPointsBuffer = FloatBuffer.allocate(validPoints.size)
@@ -813,6 +922,8 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                 //If the raw depth mode chosen, visualize depth points
                 if (currentMode == Mode.RAW_DEPTH) {
                     // Retrieve the depth data for this frame.
+
+                    // Creating our own anchor
                     if(!CSAnchorSet){
                         // Main coordinate system anchor
                         //val CSAnchorPose = Pose.makeTranslation(20f, 56f, 20f)
@@ -821,10 +932,11 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                         }
                         CSAnchorSet = true
                     }
-                    if(CSAnchorSet && pointsCounterM < maxPointsAmount) {
+
+                    if(CSAnchorSet && pointsCounterM != maxPointsAmount) {
                         val points: FloatBuffer =
                             DepthData.create(frame, CSAnchor) ?: return
-                        //DepthData.create(frame, session!!.createAnchor(camera.pose)) ?: return
+                            //DepthData.create(frame, session!!.createAnchor(camera.pose)) ?: return
 
                         if (points != null) {
                             //currentPoints = points
@@ -856,8 +968,7 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                             //var confidencePercentage = accum / counter
                             //var confidencePercentage = 8
 
-                            //pointsConfidencePerc.text = "CP : ${confidencePercentage * 100}%"
-                            pointsConfidencePerc.text = "P : ${pointsCounterM}"
+                            pointsAmountTextView.text = "P : ${pointsCounterM}"
                             //---------------------------------------------
 
                             // Visualize depth points.
@@ -865,6 +976,10 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                             depthRenderer.draw(camera)
                         }
                     }
+
+                    //if(pointsCounterM == maxPointsAmount){
+                    //    needToBeProcessed = false
+                    //}
 
                     // If not tracking, show tracking failure reason instead.
                     if (camera.trackingState == TrackingState.PAUSED) {
@@ -1033,7 +1148,7 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                     pointsCounterM += 1
                 }
                 pointsMatrixK[cx][cy][cz] = true
-
+                if(pointsCounterM == maxPointsAmount) return
             }
 
         }
