@@ -27,7 +27,9 @@ class ObjectViewer(
             putExtra("type", "-1")
             putExtra("immersiveMode", "false")
             putExtra("backgroundColor", "1.0 1.0 1.0 1.0")
+
         }
+
         //Launching activity
         context.startActivity(intent)
     }

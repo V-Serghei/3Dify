@@ -1,7 +1,9 @@
 package com.app.threedify.ui.gallery
 
+import android.content.Context
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.SharedPreferences
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.os.Build
@@ -14,14 +16,15 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
-import com.app.threedify.data.filesystem.FileSystemIObjScanner
-import com.app.threedify.data.objectviewer.ObjectViewer
+import com.app.threedify.data.filesystem.FileSystemObjScanner
 import com.app.threedify.databinding.FragmentGalleryBinding
 import com.app.threedify.manager.ObjFileSearchManager
 import com.app.threedify.ui.gallery.helpers.ObjFile
@@ -29,6 +32,7 @@ import com.app.threedify.ui.gallery.helpers.ObjFileAdapter
 import com.chaquo.python.Python
 import org.the3deer.app.model3D.view.ModelActivity
 import java.io.File
+import java.nio.file.Path
 import java.util.Date
 import java.util.Locale
 
@@ -37,7 +41,8 @@ class GalleryFragment<LinearLayout> : Fragment() {
     private var _binding: FragmentGalleryBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: ObjFileAdapter
-
+    private lateinit var sharedPreferences : SharedPreferences // for storing settings
+    private lateinit var folderSpinnerAdapter: ArrayAdapter<String>//options for dd
     @RequiresApi(Build.VERSION_CODES.R)
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -64,6 +69,9 @@ class GalleryFragment<LinearLayout> : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
+
+        sharedPreferences = requireContext().getSharedPreferences("gallery_preferences", Context.MODE_PRIVATE)
+
         val root: View = binding.root
 
         if (hasStoragePermission()) {
@@ -119,6 +127,39 @@ class GalleryFragment<LinearLayout> : Fragment() {
             adapter.updateList(files)
         }
 
+        // Populate the dd with folder options
+        val objFileScanner = FileSystemObjScanner()
+        val fileSearchManager = ObjFileSearchManager(objFileScanner)
+        val subDirs = fileSearchManager.getSubDir(File("/storage/emulated/0/"))
+        val folderNames = mutableListOf<String>()
+        subDirs.forEach { file ->
+            folderNames.add(file.name)
+        }
+        folderSpinnerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, folderNames)
+        folderSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.folderSpinner.adapter = folderSpinnerAdapter
+
+        val defaultFolder = "Download"
+        val defaultFolderIndex = folderNames.indexOf(defaultFolder)
+
+        if (defaultFolderIndex != -1) {
+            binding.folderSpinner.setSelection(defaultFolderIndex)
+            scanObjFiles(File("/storage/emulated/0/$defaultFolder"))
+        } else {
+            scanObjFiles(File("/storage/emulated/0/"))
+        }
+        // Handle item selection in the Spinner
+        binding.folderSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selectedFolder = subDirs[position]
+                editScannerPath(selectedFolder)
+                scanObjFiles(selectedFolder)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Handle the case where no folder is selected, if needed
+            }
+        }
         binding.searchBar.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 val filteredList = galleryViewModel.objFiles.value?.filter {
@@ -132,15 +173,16 @@ class GalleryFragment<LinearLayout> : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        scanObjFiles()
+        scanObjFiles(File("/storage/emulated/0/Download"))
     }
 
-    private fun scanObjFiles() {
+    private fun scanObjFiles(file: File) {
         val galleryViewModel = ViewModelProvider(this)[GalleryViewModel::class.java]
-        val objFileScanner = FileSystemIObjScanner()
+        val objFileScanner = FileSystemObjScanner()
         val fileSearchManager = ObjFileSearchManager(objFileScanner)
+        val subDirs = fileSearchManager.getSubDir(File("/storage/emulated/0"))
         val directories = listOf(
-            File("/storage/emulated/0")
+            file
         )
         val objFiles = fileSearchManager.findObjFiles(directories).map {
             val size = getFileSize(it)
@@ -187,6 +229,18 @@ class GalleryFragment<LinearLayout> : Fragment() {
         window?.attributes?.y = location[1]
     }
 
+
+    private fun editScannerPath(newPath: File){
+        val editor = sharedPreferences.edit()
+        editor.putString("searchPath", newPath.path)
+        editor.apply()
+    }
+
+
+    private fun getScannerPath(): File {
+        return File(sharedPreferences.getString("searchPath", "/storage/emulated/0")?: "/storage/emulated/0")
+    }
+
     fun getFileSize(file: File): String {
         val sizeInBytes = file.length()
         val sizeInKB = sizeInBytes / 1024
@@ -212,7 +266,7 @@ class GalleryFragment<LinearLayout> : Fragment() {
     fun getFileCreationDate(file: File): String {
         val lastModified = file.lastModified()
         val date = Date(lastModified)
-        val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("dd MMMM, HH:mm", Locale.getDefault())
         return dateFormat.format(date)
     }
     override fun onDestroyView() {
