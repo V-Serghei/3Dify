@@ -220,7 +220,7 @@ class GalleryFragment<LinearLayout> : Fragment() {
     fun getFileCreationDate(file: File): String {
         val lastModified = file.lastModified()
         val date = Date(lastModified)
-        val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("dd MMMM, HH:mm", Locale.getDefault())
         return dateFormat.format(date)
     }
     override fun onDestroyView() {
