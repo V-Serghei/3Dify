@@ -225,48 +225,64 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
          * Generation of a model based on this data.
          */
         testDataButton.setOnClickListener{
-            //pointArrays = loadPointsFromAssets(this, "point.txt")
+            pointArrays = loadPointsFromAssets(this, "point.txt")
             //val fileName = generateFileName("model_txt","obj")
             //saveModelToUri(fileName)
 
-            var buffer : FloatBuffer = FloatBuffer.allocate(30)
 
-            buffer.put(0.0f)
-            buffer.put(0.0f)
-            buffer.put(0.0f)
+            var buffer : FloatBuffer = FloatBuffer.allocate(50000)
 
-            buffer.put(0.0f)
-            buffer.put(1.0f)
-            buffer.put(0.0f)
+            this.assets.open("sphere.txt").bufferedReader().use { reader ->
+                reader.forEachLine { line ->
+                    val parts = line.split(" ")
+                    if (parts.size == 3) {
+                        val x = parts[0].toFloat()
+                        val y = parts[1].toFloat()
+                        val z = parts[2].toFloat()
+                        buffer.put(x)
+                        buffer.put(y)
+                        buffer.put(z)
+                    }
+                }
+            }
 
-            buffer.put(1.0f)
-            buffer.put(1.0f)
-            buffer.put(0.0f)
 
-            buffer.put(1.0f)
-            buffer.put(0.0f)
-            buffer.put(0.0f)
+            //buffer.put(0.0f)
+            //buffer.put(0.0f)
+            //buffer.put(0.0f)
+//
+            //buffer.put(0.0f)
+            //buffer.put(1.0f)
+            //buffer.put(0.0f)
+//
+            //buffer.put(1.0f)
+            //buffer.put(1.0f)
+            //buffer.put(0.0f)
+//
+            //buffer.put(1.0f)
+            //buffer.put(0.0f)
+            //buffer.put(0.0f)
+//
+            //buffer.put(0.0f)
+            //buffer.put(0.0f)
+            //buffer.put(1.0f)
+//
+            //buffer.put(0.0f)
+            //buffer.put(1.0f)
+            //buffer.put(1.0f)
+//
+            //buffer.put(1.0f)
+            //buffer.put(1.0f)
+            //buffer.put(1.0f)
 
-            buffer.put(0.0f)
-            buffer.put(0.0f)
-            buffer.put(1.0f)
-
-            buffer.put(0.0f)
-            buffer.put(1.0f)
-            buffer.put(1.0f)
-
-            buffer.put(1.0f)
-            buffer.put(1.0f)
-            buffer.put(1.0f)
-
-            buffer.put(1.0f)
-            buffer.put(0.0f)
-            buffer.put(1.0f)
+            //buffer.put(1.0f)
+            //buffer.put(0.0f)
+            //buffer.put(1.0f)
 
 
             val cordsTxt: StringBuilder = StringBuilder("")
 
-            for (i in 0 until 8) {
+            for (i in 0 until 4066) {
                 val x = buffer.get(i * 3)
                 val y = buffer.get(i * 3 + 1)
                 val z = buffer.get(i * 3 + 2)
@@ -468,6 +484,7 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             null
         }
     }
+
     /**
      * Calling a native method,
      * passing an array of points constructed from the point cloud,
@@ -541,14 +558,14 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                         writer.write("COUNT 1 1 1\n")
 
                         //Could be simplified-------------------
-                        var totalPoints = 0
-                        savedPoints.forEach { points ->
-                            totalPoints += points.capacity() / 3
-                        }
-                        writer.write("WIDTH $totalPoints\n")
+                        //var totalPoints = 0
+                        //savedPoints.forEach { points ->
+                        //    totalPoints += points.capacity() / 3
+                        //}
+                        writer.write("WIDTH $pointsCounterM\n")
                         writer.write("HEIGHT 1\n")
                         writer.write("VIEWPOINT 0 0 0 1 0 0 0\n")
-                        writer.write("POINTS $totalPoints\n")
+                        writer.write("POINTS $pointsCounterM\n")
                         writer.write("DATA ascii\n")
 
                         //--------------------------------------
