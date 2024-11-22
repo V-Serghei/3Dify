@@ -53,6 +53,7 @@ object DepthData {
             // corresponding to the depth image. See more information about the depth values at
             // https://developers.google.com/ar/develop/java/depth/overview#understand-depth-values.
             val intrinsics = frame.camera.textureIntrinsics
+
             val anchorMatrix = FloatArray(16)
             poseAnchor.pose.toMatrix(anchorMatrix, 0)
             val points = convertRawDepthImagesTo3dPointBuffer(
