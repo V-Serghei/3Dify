@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/nav_header_height"
+    android:background="?attr/colorPrimary"
+    android:gravity="bottom"
+    android:orientation="horizontal"
+    android:paddingLeft="45dp"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingBottom="60dp"
+    app:popupTheme="@style/Theme.TestAplication.PopupOverlay">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="40dp"
+        android:layout_height="48dp"
+        android:contentDescription="@string/nav_header_desc"
+        android:paddingTop="@dimen/nav_header_vertical_spacing"
+        app:tint="?attr/colorSecondary"
+        app:srcCompat="@drawable/main_logo" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="-3dp"
+        android:fontFamily="@font/signika_bold"
+        android:paddingTop="@dimen/cardview_compat_inset_shadow"
+        android:paddingBottom="@dimen/nav_header_vertical_spacing"
+        android:text="@string/nav_header_title"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="?attr/colorSecondary"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+
+</LinearLayout>
