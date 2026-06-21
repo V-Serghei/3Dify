@@ -1,22 +1,37 @@
 *.iml
 .gradle
 /local.properties
+local.properties
+
+# IDE - Android Studio / IntelliJ
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/gradle.xml
+/.idea/AndroidProjectSystem.xml
+/.idea/markdown.xml
+/.idea/runConfigurations.xml
+/.idea/other.xml
+
 .DS_Store
+
+# Build outputs
 /build
+**/build/
 /captures
 .externalNativeBuild
+**/.externalNativeBuild/
 .cxx
-local.properties
+**/.cxx/
 
-# Project exclude paths
-/viewerapp/build/
-/viewerapp/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/
+# Conan-managed native dependencies (Boost headers + precompiled .a libs)
+nativelib/src/main/cpp/pclib/jniLibs/
+
+# Legacy paths (kept for history)
 /pclibrarycpp/build/
-/pclibrarycpp/conan_env/bin/
-/pclibrarycpp/venv/bin/
+/pclibrarycpp/conan_env/
+/pclibrarycpp/venv/
