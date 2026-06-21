@@ -61,9 +61,53 @@ GitHub Packages requires authentication even for public packages. Every develope
 ## Prerequisites
 
 - **Android Studio** Hedgehog or newer (bundles JDK 21)
-- **Android NDK** 26.1.10909125 (install via SDK Manager)
+- **Android NDK 26.1.10909125** — exact version required (see note below)
 - **CMake** 3.22.1 (install via SDK Manager)
+- **Python 3.10** — required on the build machine for Chaquopy (see note below)
 - **GitHub account** with access to read packages
+
+---
+
+### Installing NDK 26.1.10909125
+
+> **Why NDK 26 specifically?**
+> The PCL package bundles FLANN headers that use `std::binary_function`, removed in C++17 under NDK 27+.
+> NDK 26 is the version the package was built and tested against. NDK 27+ causes a compile error in `flann/util/heap.h`.
+
+1. Open **Android Studio → Tools → SDK Manager**
+2. Go to the **SDK Tools** tab
+3. Check **Show Package Details** (bottom right corner)
+4. Expand **NDK (Side by side)**
+5. Check **26.1.10909125**
+6. Click **Apply** and wait for the download to finish
+
+You can have multiple NDK versions installed — `nativelib/build.gradle` pins `ndkVersion "26.1.10909125"` so Gradle picks the correct one automatically.
+
+---
+
+### Installing Python 3.10
+
+> **Why Python on the build machine?**
+> [Chaquopy](https://chaquo.com/chaquopy/) cross-compiles Python packages (`numpy`, `trimesh`, `requests`)
+> for Android at build time. It needs a matching Python 3.10 interpreter on your machine to do this.
+> This is a **build-time** requirement — Python is not bundled in the APK directly.
+
+**Windows (recommended):**
+```powershell
+winget install Python.Python.3.10
+```
+
+**macOS:**
+```bash
+brew install python@3.10
+```
+
+**Linux:**
+```bash
+sudo apt install python3.10
+```
+
+After installing, **restart Android Studio** (or your terminal) so Chaquopy can find the new interpreter.
 
 ---
 
@@ -195,6 +239,16 @@ buildFeatures {
 **App crashes on launch — no depth data**
 
 ARCore Depth API requires a device with a hardware depth sensor (Time-of-Flight camera). The app will not work on emulators or devices without depth support.
+
+**Compile error: `no template named 'binary_function' in namespace 'std'`**
+
+The FLANN headers bundled in the PCL package use `std::binary_function` which was removed in C++17.
+The fix is already applied in `CMakeLists.txt` via `_LIBCPP_ENABLE_CXX17_REMOVED_FEATURES` which
+re-enables the removed features in libc++. If you see this error, make sure you have a clean build:
+
+```bash
+.\gradlew.bat clean :nativelib:assembleDebug
+```
 
 **Build fails for x86 / x86_64 / armeabi-v7a**
 

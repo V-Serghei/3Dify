@@ -53,6 +53,12 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    packagingOptions {
+        // These .so files come from both nativelib (via Prefab) and the PCL AAR directly — pick one
+        pickFirst 'lib/arm64-v8a/libc++_shared.so'
+        pickFirst 'lib/arm64-v8a/libpclibrary.so'
+    }
 }
 
 dependencies {

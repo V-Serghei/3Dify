@@ -12,6 +12,9 @@ local.properties
 
 .DS_Store
 
+# Kotlin compiler daemon session files
+.kotlin/
+
 # Build outputs
 /build
 **/build/

@@ -6,6 +6,7 @@ plugins {
 android {
     namespace 'com.example.nativelib'
     compileSdk = 37
+    ndkVersion "26.1.10909125"
 
     defaultConfig {
         minSdk 29
