@@ -135,7 +135,7 @@ preBuild.dependsOn extractArchives
 
 android {
     namespace 'com.example.nativelib'
-    compileSdk 37
+    compileSdk = 37
 
     defaultConfig {
         minSdk 29
