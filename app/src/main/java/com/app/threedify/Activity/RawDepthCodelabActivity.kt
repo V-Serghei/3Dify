@@ -421,14 +421,23 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
          */
 
 
+        loadScanQualitySettings()
+
         //------------------
         val externalFile = File(getExternalFilesDir(null), "cords.txt")
         externalFile.writeText(" ")
-
-
-
         //------------------
+    }
 
+    private fun loadScanQualitySettings() {
+        val prefs = getSharedPreferences("ScanSettings", android.content.Context.MODE_PRIVATE)
+        val points = when (prefs.getString("quality", "medium")) {
+            "low" -> 100_000
+            "high" -> 1_000_000
+            else -> 400_000
+        }
+        amountOfPointsSeekBar.progress = points
+        maxPointsAmount = points
     }
 
     /**
@@ -942,111 +951,46 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         displayRotationHelper?.updateSessionIfNeeded(session!!)
 
 
-        if(needToBeProcessed) {
-            try {
-                session!!.setCameraTextureName(backgroundRenderer.textureId)
+        try {
+            session!!.setCameraTextureName(backgroundRenderer.textureId)
+            val frame = session!!.update()
+            val camera = frame.camera
 
-                // Obtain the current frame from ARSession. When the configuration is set to
-                // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
-                // camera framerate.
-                val frame = session!!.update()
-                val camera = frame.camera
+            // Camera preview renders every frame, regardless of scan state
+            backgroundRenderer.draw(frame)
 
-                // If frame is ready, render camera preview image to the GL surface.
-                backgroundRenderer.draw(frame)
-
-                //If the raw depth mode chosen, visualize depth points
-                if (currentMode == Mode.RAW_DEPTH) {
-                    // Retrieve the depth data for this frame.
-
-                    // Creating our own anchor
-                    if(!CSAnchorSet){
-                        // Main coordinate system anchor
-                        //val CSAnchorPose = Pose.makeTranslation(20f, 56f, 20f)
-                        if(session!=null) {
-                            CSAnchor = session!!.createAnchor(camera.pose)
-                        }
-                        CSAnchorSet = true
+            if (needToBeProcessed && currentMode == Mode.RAW_DEPTH) {
+                if (!CSAnchorSet) {
+                    if (session != null) {
+                        CSAnchor = session!!.createAnchor(camera.pose)
                     }
+                    CSAnchorSet = true
+                }
 
-                    if(CSAnchorSet) {
-                        val points: FloatBuffer =
-                        //DepthData.create(frame, CSAnchor) ?: return
+                if (CSAnchorSet) {
+                    val points: FloatBuffer =
                         DepthData.create(frame, session!!.createAnchor(camera.pose)) ?: return
 
+                    if (points != null) {
+                        cameraPoseCurrent = camera.pose
 
-                        //val points: FloatBuffer = DepthData2.createPointCloud(frame)
-
-                        if (points != null) {
-                            //currentPoints = points
-                            cameraPoseCurrent = camera.pose
-
-                            // Filters the depth data.
-                            //if (planesFiltringEnable) {
-                            //    DepthData.filterUsingPlanes(
-                            //        points,
-                            //        session!!.getAllTrackables(Plane::class.java)
-                            //    )
-                            //}
-
-
-                            //---------------------------------------------
-
-                            if(pointsCounterM != maxPointsAmount) {
-                                //pointsMapUpdate(points)
-                                pointsMatrixUpdate(points)
-                                //pointsMatrixUpdate1(points)
-                                //pointsArrayUpdate(points)
-
-                                //var accum = 0.0f
-                                //var counter = 0
-
-
-                                //var confidencePercentage = accum / counter
-                                //var confidencePercentage = 8
-
-                                pointsAmountTextView.text = "P : ${pointsCounterM}"
-                                //Log.i("TAG", "d_points -  $pointsCounterM, a_size - ${pA1.size/4} ")
-                                //---------------------------------------------
-
-                                // Visualize depth points.
-
-
-                            }
-                            //cubeRenderer.draw(camera)
-                            //sphereRenderer.draw(camera, pMB1)
-
-                            //depthRenderer.update(pMB1)
-                            //depthRenderer.update(pMB)
-                            depthRenderer.update(pMB1)
-                            depthRenderer.draw(camera)
+                        if (pointsCounterM != maxPointsAmount) {
+                            pointsMatrixUpdate(points)
+                            pointsAmountTextView.text = "P : ${pointsCounterM}"
                         }
+                        depthRenderer.update(pMB1)
+                        depthRenderer.draw(camera)
                     }
-
-                    //if(pointsCounterM == maxPointsAmount){
-                    //    needToBeProcessed = false
-                    //}
-
-                    // If not tracking, show tracking failure reason instead.
-                    if (camera.trackingState == TrackingState.PAUSED) {
-                        messageSnackbarHelper.showMessage(
-                            this, TrackingStateHelper.getTrackingFailureReasonString(camera)
-                        )
-                        return
-                    }
-
-                    //If you want drawn boxes uncomment
-//            // Draw boxes around clusters of points.
-//            val clusteringHelper: PointClusteringHelper = PointClusteringHelper(points)
-//            val clusters: List<AABB> = clusteringHelper.findClusters()
-//            for (aabb in clusters) {
-//                boxRenderer.draw(aabb, camera)
-//            }
                 }
-            } catch (t: Throwable) {
-                // Avoid crashing the application due to unhandled exceptions.
-                Log.e(TAG, "Exception on the OpenGL thread", t)
             }
+
+            if (camera.trackingState == TrackingState.PAUSED) {
+                messageSnackbarHelper.showMessage(
+                    this, TrackingStateHelper.getTrackingFailureReasonString(camera)
+                )
+            }
+        } catch (t: Throwable) {
+            Log.e(TAG, "Exception on the OpenGL thread", t)
         }
     }
 

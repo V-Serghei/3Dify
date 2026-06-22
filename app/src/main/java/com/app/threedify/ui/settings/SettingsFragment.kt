@@ -1,19 +1,17 @@
 package com.app.threedify.ui.settings
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.app.threedify.databinding.FragmentSettingsBinding
 
 class SettingsFragment : Fragment() {
-    private var _binding: FragmentSettingsBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
+    private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -21,17 +19,39 @@ class SettingsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val settingsViewModel =
-            ViewModelProvider(this).get(SettingsViewModel::class.java)
-
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        setupTheme()
+        setupScanQuality()
+        return binding.root
+    }
 
-        val textView: TextView = binding.textSettings
-        settingsViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
+    private fun setupTheme() {
+        val prefs = requireContext().getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE)
+        binding.switchDarkTheme.isChecked = prefs.getBoolean("isDarkTheme", false)
+        binding.switchDarkTheme.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("isDarkTheme", isChecked).apply()
+            AppCompatDelegate.setDefaultNightMode(
+                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
+                else AppCompatDelegate.MODE_NIGHT_NO
+            )
         }
-        return root
+    }
+
+    private fun setupScanQuality() {
+        val prefs = requireContext().getSharedPreferences("ScanSettings", Context.MODE_PRIVATE)
+        when (prefs.getString("quality", "medium")) {
+            "low" -> binding.radioScanQuality.check(binding.qualityLow.id)
+            "high" -> binding.radioScanQuality.check(binding.qualityHigh.id)
+            else -> binding.radioScanQuality.check(binding.qualityMedium.id)
+        }
+        binding.radioScanQuality.setOnCheckedChangeListener { _, checkedId ->
+            val quality = when (checkedId) {
+                binding.qualityLow.id -> "low"
+                binding.qualityHigh.id -> "high"
+                else -> "medium"
+            }
+            prefs.edit().putString("quality", quality).apply()
+        }
     }
 
     override fun onDestroyView() {
