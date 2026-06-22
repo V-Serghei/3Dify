@@ -13,6 +13,9 @@ find_package(pclibrary REQUIRED CONFIG)
 target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
         _LIBCPP_ENABLE_CXX17_REMOVED_FEATURES)
 
+# Align LOAD segments to 16KB for Android 15+ compatibility (NDK 26 requires explicit flag)
+target_link_options(${CMAKE_PROJECT_NAME} PRIVATE -Wl,-z,max-page-size=16384)
+
 target_link_libraries(${CMAKE_PROJECT_NAME}
         pclibrary::pclibrary
         android
