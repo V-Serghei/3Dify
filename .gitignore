@@ -5,6 +5,7 @@ local.properties
 
 # IDE - Android Studio / IntelliJ (exclude all machine-specific and auto-generated files)
 /.idea/
+.vscode/
 !/.idea/codeStyles/
 !/.idea/vcs.xml
 !/.idea/kotlinc.xml
