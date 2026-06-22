@@ -1,46 +1,24 @@
 package com.app.arcore
 
 import android.content.Context
+import android.view.View
 import androidx.fragment.app.FragmentActivity
-import com.google.ar.core.Config
 import com.google.ar.core.Frame
 import com.google.ar.core.PointCloud
-import io.github.sceneview.ar.ArSceneView
 
 class ArCoreManager {
-    private lateinit var arSceneView: ArSceneView
     private var pointCloudEnabled = false
 
-    fun initialize(context: Context, arSceneView: ArSceneView, activity: FragmentActivity) {
-        this.arSceneView = arSceneView
-
-        // SceneView manages the ARCore session and camera permissions internally.
-        // Configure session options via the callback below.
-        arSceneView.configureSession = { _, config ->
-            config.focusMode = Config.FocusMode.AUTO
-            config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
-            config.planeFindingMode = Config.PlaneFindingMode.DISABLED
-        }
-
-        // Called on every AR frame — main per-frame processing goes here
-        arSceneView.onArFrame = { arFrame ->
-            if (pointCloudEnabled) {
-                displayPointCloud(arFrame.frame)
-            }
-        }
+    fun initialize(context: Context, arView: View, activity: FragmentActivity) {
+        // SceneView ArSceneView integration goes here.
+        // Cast arView to ArSceneView and configure session + frame listener when ready.
     }
 
-    fun onResume(context: Context, activity: FragmentActivity) {
-        arSceneView.onResume()
-    }
+    fun onResume(context: Context, activity: FragmentActivity) {}
 
-    fun onPause() {
-        arSceneView.onPause()
-    }
+    fun onPause() {}
 
-    fun onDestroy() {
-        arSceneView.destroy()
-    }
+    fun onDestroy() {}
 
     fun togglePointCloud() {
         pointCloudEnabled = !pointCloudEnabled
