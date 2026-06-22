@@ -480,15 +480,25 @@ class RawDepthCodelabActivity : AppCompatActivity(), GLSurfaceView.Renderer {
      * \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
      */
     private fun createModelUri(fileName: String): Uri? {
+        val prefs = getSharedPreferences("SaveSettings", android.content.Context.MODE_PRIVATE)
+        val relativePath = prefs.getString("modelRelativePath", Environment.DIRECTORY_DOWNLOADS)
+            ?: Environment.DIRECTORY_DOWNLOADS
+
         val resolver = application.contentResolver
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
             put(MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+            put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath)
         }
 
-        return resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)?.also {
-            Log.d("JNI", "URI: $it")
+        val collection = if (relativePath.startsWith(Environment.DIRECTORY_DOCUMENTS)) {
+            MediaStore.Files.getContentUri("external")
+        } else {
+            MediaStore.Downloads.EXTERNAL_CONTENT_URI
+        }
+
+        return resolver.insert(collection, values)?.also {
+            Log.d("JNI", "URI: $it, path: $relativePath")
         } ?: run {
             Log.e("JNI", "Failed to create URI for saving the file.")
             null

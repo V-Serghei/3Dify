@@ -11,60 +11,6 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Appearance section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Appearance"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            android:textAllCaps="true"
-            android:alpha="0.6"
-            android:layout_marginBottom="6dp"
-            android:layout_marginStart="4dp" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:gravity="center_vertical">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Dark Theme"
-                        android:textSize="15sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Switch between light and dark mode"
-                        android:textSize="12sp"
-                        android:alpha="0.6"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switch_dark_theme"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
         <!-- Scan Quality section -->
         <TextView
             android:layout_width="wrap_content"
@@ -165,33 +111,54 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <!-- 3D Models save path row -->
                 <LinearLayout
+                    android:id="@+id/row_save_path"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingBottom="10dp">
+                    android:gravity="center_vertical"
+                    android:paddingBottom="10dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="3D models saved to"
-                        android:textSize="14sp" />
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="3D Models save location"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/text_save_path"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Downloads"
+                            android:textSize="12sp"
+                            android:alpha="0.6"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Downloads/"
-                        android:textSize="14sp"
-                        android:alpha="0.6" />
+                        android:text="Change"
+                        android:textSize="13sp"
+                        android:textColor="?attr/colorPrimary" />
                 </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#20808080"
-                    android:alpha="0.2" />
+                    android:background="#20808080" />
 
+                <!-- PCD files row (info only) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -264,8 +231,7 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#20808080"
-                    android:alpha="0.2" />
+                    android:background="#20808080" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -292,8 +258,7 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#20808080"
-                    android:alpha="0.2" />
+                    android:background="#20808080" />
 
                 <LinearLayout
                     android:layout_width="match_parent"

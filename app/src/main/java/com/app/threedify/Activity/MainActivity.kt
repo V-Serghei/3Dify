@@ -144,14 +144,12 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun setupThemeSwitch() {
-        // Initialize theme switch and set its state based on saved preference
         switchTheme = binding.navView.findViewById(R.id.switch_theme)
+        // Prevent the switch from saving/restoring instance state, which causes
+        // the listener to fire on recreation and triggers an infinite recreate loop.
+        switchTheme.isSaveEnabled = false
         switchTheme.isChecked = getSavedThemeState()
         switchTheme.setOnCheckedChangeListener { _, isChecked ->
-            val targetMode = if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
-                             else AppCompatDelegate.MODE_NIGHT_NO
-            // Guard against spurious calls during view-state restore after recreation
-            if (AppCompatDelegate.getDefaultNightMode() == targetMode) return@setOnCheckedChangeListener
             if (isChecked) setDarkTheme() else setLightTheme()
             saveThemeState(isChecked)
         }

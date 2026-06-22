@@ -1,11 +1,12 @@
 package com.app.threedify.ui.settings
 
+import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.app.threedify.databinding.FragmentSettingsBinding
 
@@ -20,22 +21,9 @@ class SettingsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
-        setupTheme()
         setupScanQuality()
+        setupSavePath()
         return binding.root
-    }
-
-    private fun setupTheme() {
-        val prefs = requireContext().getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE)
-        binding.switchDarkTheme.isChecked = prefs.getBoolean("isDarkTheme", false)
-        binding.switchDarkTheme.setOnCheckedChangeListener { _, isChecked ->
-            val targetMode = if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
-                             else AppCompatDelegate.MODE_NIGHT_NO
-            // Guard against spurious calls during view-state restore after recreation
-            if (AppCompatDelegate.getDefaultNightMode() == targetMode) return@setOnCheckedChangeListener
-            prefs.edit().putBoolean("isDarkTheme", isChecked).apply()
-            AppCompatDelegate.setDefaultNightMode(targetMode)
-        }
     }
 
     private fun setupScanQuality() {
@@ -52,6 +40,43 @@ class SettingsFragment : Fragment() {
                 else -> "medium"
             }
             prefs.edit().putString("quality", quality).apply()
+        }
+    }
+
+    private fun setupSavePath() {
+        val prefs = requireContext().getSharedPreferences("SaveSettings", Context.MODE_PRIVATE)
+
+        fun updateDisplay() {
+            val relativePath = prefs.getString("modelRelativePath", Environment.DIRECTORY_DOWNLOADS)
+                ?: Environment.DIRECTORY_DOWNLOADS
+            binding.textSavePath.text = relativePath.replace("/", " / ")
+        }
+
+        updateDisplay()
+
+        binding.rowSavePath.setOnClickListener {
+            val options = arrayOf(
+                "Downloads",
+                "Downloads / 3Dify",
+                "Documents / 3Dify"
+            )
+            val relativePaths = arrayOf(
+                Environment.DIRECTORY_DOWNLOADS,
+                "${Environment.DIRECTORY_DOWNLOADS}/3Dify",
+                "${Environment.DIRECTORY_DOCUMENTS}/3Dify"
+            )
+            val current = prefs.getString("modelRelativePath", Environment.DIRECTORY_DOWNLOADS)
+            val checkedItem = relativePaths.indexOfFirst { it == current }.coerceAtLeast(0)
+
+            AlertDialog.Builder(requireContext())
+                .setTitle("Save 3D models to")
+                .setSingleChoiceItems(options, checkedItem) { dialog, which ->
+                    prefs.edit().putString("modelRelativePath", relativePaths[which]).apply()
+                    updateDisplay()
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
     }
 
