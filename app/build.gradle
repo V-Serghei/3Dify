@@ -6,19 +6,19 @@ plugins {
 
 android {
     namespace 'com.app.threedify'
-    compileSdk 34
+    compileSdk = 37
 
     defaultConfig {
         applicationId "com.app.threedify"
         minSdk 29
-        targetSdk 34
+        targetSdk = 37
         versionCode 1
         versionName "1.0"
-        ndk{
-            abiFilters "x86", "x86_64", "armeabi-v7a", "arm64-v8a"
+        ndk {
+            abiFilters "arm64-v8a"
         }
         python {
-            version "3.8"
+            version "3.10"
         }
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -53,6 +53,13 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    packagingOptions {
+        // These .so files come from both nativelib (via Prefab) and the PCL AAR directly — pick one
+        pickFirst 'lib/arm64-v8a/libc++_shared.so'
+        pickFirst 'lib/arm64-v8a/libpclibrary.so'
+        pickFirst 'lib/arm64-v8a/libomp.so'
+    }
 }
 
 dependencies {
@@ -65,7 +72,7 @@ dependencies {
     implementation libs.androidx.constraintlayout
     implementation libs.androidx.navigation.fragment.ktx
     implementation libs.androidx.navigation.ui.ktx
-    implementation libs.sceneform.core
+    implementation libs.arsceneview
     implementation libs.androidx.navigation.runtime.ktx
     implementation libs.androidx.navigation.runtime.ktx
     implementation project(':nativelib')

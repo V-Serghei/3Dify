@@ -1,78 +1,22 @@
 cmake_minimum_required(VERSION 3.22.1)
 
 project("nativelib")
-set(BOOST_ROOT "pclib/jniLibs/arm64-v8a/boost")
-set(EIGEN_ROOT "pclib/jniLibs/arm64-v8a/eigen")
-set(FLANN_ROOT "pclib/jniLibs/arm64-v8a/flann")
-set(LZ4_ROOT "pclib/jniLibs/arm64-v8a/lz4")
-set(PCL_ROOT "pclib/jniLibs/arm64-v8a/pcl")
-include_directories(${BOOST_ROOT}/include ${EIGEN_ROOT}/include/eigen3 ${FLANN_ROOT}/include ${LZ4_ROOT}/include ${PCL_ROOT}/include)
-link_directories(${BOOST_ROOT}/lib ${FLANN_ROOT}/lib ${LZ4_ROOT}/lib ${PCL_ROOT}/lib)
+
 add_library(${CMAKE_PROJECT_NAME} SHARED
         nativelib.cpp
         PointCloudTo3DModel.cpp)
-find_package(OpenMP REQUIRED)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
 
-if (OpenMP_CXX_FOUND)
-    target_link_libraries(nativelib OpenMP::OpenMP_CXX)
-endif ()
-target_link_libraries(nativelib -fopenmp)
+find_package(pclibrary REQUIRED CONFIG)
+
+# FLANN headers in the PCL package use std::binary_function which was removed in C++17.
+# This flag re-enables deprecated C++17 features in libc++ so the headers compile cleanly.
+target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
+        _LIBCPP_ENABLE_CXX17_REMOVED_FEATURES)
+
+# Align LOAD segments to 16KB for Android 15+ compatibility (NDK 26 requires explicit flag)
+target_link_options(${CMAKE_PROJECT_NAME} PRIVATE -Wl,-z,max-page-size=16384)
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
-        -lpcl_common
-        -lpcl_io
-        -lpcl_io_ply
-        -lpcl_kdtree
-        -lpcl_features
-        -lpcl_filters
-        -lpcl_segmentation
-        -lpcl_tracking
-        -lpcl_recognition
-        -lpcl_ml
-        -lpcl_search
-        -lpcl_registration
-        -lpcl_keypoints
-        -lpcl_sample_consensus
-        -lpcl_surface
-        -lpcl_octree
-        -lpcl_stereo
-        -lflann_cpp_s
-        -llz4
-        -lboost_system
-        -lboost_filesystem
-        -lboost_thread
-        -lboost_chrono
-        -lboost_date_time
-        -lboost_graph
-        -lboost_log
-        -lboost_log_setup
-        -lboost_program_options
-        -lboost_random
-        -lboost_math_tr1
-        -lboost_exception
-        -lboost_type_erasure
-        -lboost_container
-        -lboost_iostreams
-        -lboost_stacktrace_noop
-        -lboost_fiber
-        -lboost_math_c99
-        -lboost_stacktrace_basic
-        -lboost_wserialization
-        -lboost_wave
-        -lboost_serialization
-        -lboost_unit_test_framework
-        -lboost_prg_exec_monitor
-        -lboost_timer
-        -lboost_context
-        -lboost_log_setup
-        -lboost_log
-        -lboost_program_options
-        -landroid
-        -llog
-        -latomic
-        -lm
-        -llz4
-)
-
+        pclibrary::pclibrary
+        android
+        log)

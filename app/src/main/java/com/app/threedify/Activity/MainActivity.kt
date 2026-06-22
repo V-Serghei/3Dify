@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var switchTheme: Switch
     private lateinit var navController: NavController
     private var savedNavigationState: NavigationState = NavigationState.HOME
+    private var leftForCamera = false
     ///for interface!!
     ////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////
@@ -143,11 +144,12 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun setupThemeSwitch() {
-        // Initialize theme switch and set its state based on saved preference
         switchTheme = binding.navView.findViewById(R.id.switch_theme)
+        // Prevent the switch from saving/restoring instance state, which causes
+        // the listener to fire on recreation and triggers an infinite recreate loop.
+        switchTheme.isSaveEnabled = false
         switchTheme.isChecked = getSavedThemeState()
         switchTheme.setOnCheckedChangeListener { _, isChecked ->
-            // Change theme based on switch state
             if (isChecked) setDarkTheme() else setLightTheme()
             saveThemeState(isChecked)
         }
@@ -206,6 +208,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun openCameraActivity(fromMenu: Boolean) {
         saveCurrentNavigationState()
+        leftForCamera = true
         val intent = Intent(this, RawDepthCodelabActivity::class.java)
         intent.putExtra("fromMenu", fromMenu)
         startActivity(intent)
@@ -261,18 +264,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        restoreNavigationState()
+        if (leftForCamera) {
+            leftForCamera = false
+            restoreNavigationState()
+        }
         val navView: NavigationView = binding.navView
         val menu = navView.menu
-        val currentFragmentId = when (savedNavigationState) {
-            NavigationState.HOME -> R.id.nav_home
-            NavigationState.CAMERA -> R.id.nav_camera
-            NavigationState.GALLERY -> R.id.nav_gallery
-            NavigationState.SETTINGS -> R.id.nav_settings
-            NavigationState.ABOUT_US -> R.id.nav_about_us
-        }
+        val currentDestId = navController.currentDestination?.id ?: R.id.nav_home
         for (i in 0 until menu.size()) {
-            menu.getItem(i).isChecked = menu.getItem(i).itemId == currentFragmentId
+            menu.getItem(i).isChecked = menu.getItem(i).itemId == currentDestId
         }
     }
     override fun onNewIntent(intent: Intent) {
