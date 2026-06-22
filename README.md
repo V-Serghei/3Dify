@@ -54,7 +54,7 @@ The C++ code uses **Point Cloud Library (PCL)** via a prebuilt AAR with Prefab m
 ```groovy
 // nativelib/build.gradle
 dependencies {
-    implementation "io.github.v-serghei:pcl-android-arm64:1.0.2"
+    implementation "io.github.v-serghei:pcl-android-arm64:1.0.4"
 }
 ```
 
@@ -79,7 +79,7 @@ If you need a version not yet published on Maven Central, the package is also av
 | Repository | https://github.com/V-Serghei/pcl-binaries-android-armv8 |
 | Maven group | `io.github.v-serghei` |
 | Artifact | `pcl-android-arm64` |
-| Current version | `1.0.2` |
+| Current version | `1.0.4` |
 
 GitHub Packages requires a token with `read:packages` scope even for public packages.
 
@@ -127,6 +127,27 @@ maven {
 - **Python 3.10** — required on the build machine for Chaquopy (see note below)
 
 No GitHub account or token required for a standard build.
+
+---
+
+### 16KB page size (Android 15+)
+
+Android 15 requires native libraries to have LOAD segments aligned to 16KB. The flag is already applied in `nativelib/src/main/cpp/CMakeLists.txt`:
+
+```cmake
+target_link_options(nativelib PRIVATE -Wl,-z,max-page-size=16384)
+```
+
+This fixes `libnativelib.so`. Other libraries in the warning dialog are third-party and cannot be fixed from this project:
+
+| Library | Owner | Status |
+|---|---|---|
+| `libpclibrary.so` | `pcl-binaries-android-armv8` (your repo) | Fixed in AAR 1.0.4 |
+| `libarcore_sdk_jni.so` | Google ARCore | Wait for ARCore update |
+| `libchaquopy_java.so` / Python libs | Chaquopy | Wait for Chaquopy update |
+| `libarsceneview_jni.so` / Filament libs | Sceneform 1.17.1 (abandoned) | No fix available |
+
+The warning is informational only — the app runs normally on all Android versions.
 
 ---
 
