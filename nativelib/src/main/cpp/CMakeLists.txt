@@ -16,11 +16,7 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
 # Align LOAD segments to 16KB for Android 15+ compatibility (NDK 26 requires explicit flag)
 target_link_options(${CMAKE_PROJECT_NAME} PRIVATE -Wl,-z,max-page-size=16384)
 
-# libpclibrary.so is linked against OpenMP; -fopenmp tells the NDK linker to
-# include libomp.so from the toolchain into the APK's lib/arm64-v8a/ directory.
-target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE -fopenmp)
 target_link_libraries(${CMAKE_PROJECT_NAME}
         pclibrary::pclibrary
-        -fopenmp
         android
         log)
