@@ -29,11 +29,12 @@ class SettingsFragment : Fragment() {
         val prefs = requireContext().getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE)
         binding.switchDarkTheme.isChecked = prefs.getBoolean("isDarkTheme", false)
         binding.switchDarkTheme.setOnCheckedChangeListener { _, isChecked ->
+            val targetMode = if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
+                             else AppCompatDelegate.MODE_NIGHT_NO
+            // Guard against spurious calls during view-state restore after recreation
+            if (AppCompatDelegate.getDefaultNightMode() == targetMode) return@setOnCheckedChangeListener
             prefs.edit().putBoolean("isDarkTheme", isChecked).apply()
-            AppCompatDelegate.setDefaultNightMode(
-                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
-                else AppCompatDelegate.MODE_NIGHT_NO
-            )
+            AppCompatDelegate.setDefaultNightMode(targetMode)
         }
     }
 

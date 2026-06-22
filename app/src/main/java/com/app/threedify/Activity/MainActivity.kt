@@ -148,7 +148,10 @@ class MainActivity : AppCompatActivity() {
         switchTheme = binding.navView.findViewById(R.id.switch_theme)
         switchTheme.isChecked = getSavedThemeState()
         switchTheme.setOnCheckedChangeListener { _, isChecked ->
-            // Change theme based on switch state
+            val targetMode = if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
+                             else AppCompatDelegate.MODE_NIGHT_NO
+            // Guard against spurious calls during view-state restore after recreation
+            if (AppCompatDelegate.getDefaultNightMode() == targetMode) return@setOnCheckedChangeListener
             if (isChecked) setDarkTheme() else setLightTheme()
             saveThemeState(isChecked)
         }
