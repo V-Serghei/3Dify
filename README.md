@@ -45,16 +45,77 @@ viewerapp/            — Standalone OBJ viewer module
 
 ---
 
-## PCL Native Dependency
+## PCL Android Dependency
 
-The C++ code uses **Point Cloud Library (PCL)** for 3D processing. Instead of vendoring source, the project pulls a prebuilt AAR from GitHub Packages:
+The C++ code uses **Point Cloud Library (PCL)** via a prebuilt AAR with Prefab metadata — source is not vendored in the repository.
 
-- **Package:** `io.github.vserghei:pcl-android-arm64:1.0.2`
-- **Repository:** https://github.com/V-Serghei/pcl-binaries-android-armv8
-- **Format:** Android AAR with Prefab metadata
-- **Bundled libraries:** PCL 1.9.1, Boost 1.70, Eigen 3.3.7, FLANN 1.9.1, LZ4 1.9.1
+### Primary: Maven Central (recommended, no token required)
 
-GitHub Packages requires authentication even for public packages. Every developer must configure a GitHub Personal Access Token locally.
+```groovy
+// nativelib/build.gradle
+dependencies {
+    implementation "io.github.v-serghei:pcl-android-arm64:1.0.2"
+}
+```
+
+```groovy
+// settings.gradle — no special repository configuration needed
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()   // PCL is published here
+    }
+}
+```
+
+No GitHub account and no personal access token needed. Works out of the box for all contributors and CI.
+
+### Fallback: GitHub Packages (requires authentication)
+
+If you need a version not yet published on Maven Central, the package is also available on GitHub Packages:
+
+| Field | Value |
+|---|---|
+| Repository | https://github.com/V-Serghei/pcl-binaries-android-armv8 |
+| Maven group | `io.github.v-serghei` |
+| Artifact | `pcl-android-arm64` |
+| Current version | `1.0.2` |
+
+GitHub Packages requires a token with `read:packages` scope even for public packages.
+
+**Step 1** — Create a GitHub Personal Access Token with `read:packages` scope:
+1. Go to **GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)**
+2. Click **Generate new token (classic)**, select scope `read:packages`
+3. Copy the token immediately — it is shown only once
+
+**Step 2** — Add credentials to `~/.gradle/gradle.properties` (never commit this file):
+```properties
+gpr.user=YOUR_GITHUB_USERNAME
+gpr.key=YOUR_GITHUB_TOKEN
+```
+
+**Step 3** — Add the GitHub Packages repository to `settings.gradle`:
+```groovy
+maven {
+    url = uri("https://maven.pkg.github.com/V-Serghei/pcl-binaries-android-armv8")
+    credentials {
+        username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
+        password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
+    }
+}
+```
+
+> The project currently uses **Maven Central** as the only source. The GitHub Packages steps above are for reference only.
+
+### Bundled libraries
+
+| Library | Version |
+|---|---|
+| PCL | 1.9.1 |
+| Boost | 1.70 |
+| Eigen | 3.3.7 |
+| FLANN | 1.9.1 |
+| LZ4 | 1.9.1 |
 
 ---
 
@@ -64,7 +125,8 @@ GitHub Packages requires authentication even for public packages. Every develope
 - **Android NDK 26.1.10909125** — exact version required (see note below)
 - **CMake** 3.22.1 (install via SDK Manager)
 - **Python 3.10** — required on the build machine for Chaquopy (see note below)
-- **GitHub account** with access to read packages
+
+No GitHub account or token required for a standard build.
 
 ---
 
@@ -120,34 +182,15 @@ git clone https://github.com/YOUR_ORG/3Dify.git
 cd 3Dify
 ```
 
-### 2. Create a GitHub Personal Access Token
+### 2. Install NDK 26 and Python 3.10
 
-GitHub Packages requires a token with `read:packages` scope.
+See the prerequisite sections above.
 
-1. Go to **GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)**
-2. Click **Generate new token (classic)**
-3. Give it a name, e.g. `3Dify PCL read`
-4. Select scope: `read:packages`
-5. Click **Generate token**
-6. Copy the token immediately — it is shown only once
+### 3. Open in Android Studio
 
-### 3. Add the token to your local Gradle properties
+Open the `3Dify` folder and wait for Gradle sync to complete. Gradle downloads the PCL package from Maven Central automatically — no token needed.
 
-Create or edit the file `~/.gradle/gradle.properties` (on Windows: `C:\Users\YOUR_USERNAME\.gradle\gradle.properties`):
-
-```properties
-gpr.user=YOUR_GITHUB_USERNAME
-gpr.key=YOUR_GITHUB_TOKEN
-```
-
-> **Never commit this file or tokens to any repository.**
-> The `~/.gradle/gradle.properties` file is outside the project directory and is never tracked by git.
-
-### 4. Open in Android Studio
-
-Open the `3Dify` folder in Android Studio and wait for Gradle sync to complete. Gradle will automatically download the PCL package from GitHub Packages.
-
-### 5. Build and run
+### 4. Build and run
 
 Connect a physical Android device (arm64, API 29+, depth camera required for full functionality) and press **Run**.
 
@@ -163,41 +206,28 @@ Or build from the command line:
 
 ---
 
-## Environment Variables (CI / GitHub Actions)
+## CI / GitHub Actions
 
-For automated builds, set these secrets in your repository settings:
+No special secrets are needed — the PCL package is pulled from Maven Central. Just run the standard Gradle build step.
+
+If you switch to the GitHub Packages fallback, add these repository secrets:
 
 | Secret | Value |
 |---|---|
 | `GITHUB_ACTOR` | GitHub username of the token owner |
 | `GITHUB_TOKEN` | PAT with `read:packages` scope |
 
-The `settings.gradle` reads them automatically:
-
-```groovy
-username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
-password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
-```
-
 ---
 
-## PCL Package Repository
+## Updating the PCL Version
 
-The prebuilt PCL binaries are maintained in a separate repository:
-
-| Field | Value |
-|---|---|
-| Repository | https://github.com/V-Serghei/pcl-binaries-android-armv8 |
-| Maven group | `io.github.vserghei` |
-| Artifact | `pcl-android-arm64` |
-| Current version | `1.0.2` |
-| ABI | `arm64-v8a` only |
-
-To use a newer version of the package, update `nativelib/build.gradle`:
+To use a newer version, update the dependency in [nativelib/build.gradle](nativelib/build.gradle):
 
 ```groovy
-implementation "io.github.vserghei:pcl-android-arm64:NEW_VERSION"
+implementation "io.github.v-serghei:pcl-android-arm64:NEW_VERSION"
 ```
+
+The package source repository is: https://github.com/V-Serghei/pcl-binaries-android-armv8
 
 ---
 
@@ -218,14 +248,6 @@ Standalone viewer that loads and renders OBJ files using Sceneform.
 ---
 
 ## Troubleshooting
-
-**Gradle sync fails with 401 Unauthorized**
-
-Your GitHub token is missing or incorrect. Check `~/.gradle/gradle.properties`:
-```properties
-gpr.user=YOUR_GITHUB_USERNAME
-gpr.key=YOUR_TOKEN_WITH_READ_PACKAGES
-```
 
 **`find_package(pclibrary REQUIRED CONFIG)` fails in CMake**
 
@@ -261,11 +283,19 @@ The PCL package is `arm64-v8a` only. The project ABI is already restricted to `a
 .\gradlew.bat :app:assembleDebug --no-daemon
 ```
 
+**Gradle sync fails with 401 Unauthorized**
+
+This only happens if the GitHub Packages fallback is configured. Check `~/.gradle/gradle.properties`:
+```properties
+gpr.user=YOUR_GITHUB_USERNAME
+gpr.key=YOUR_TOKEN_WITH_READ_PACKAGES
+```
+
 ---
 
 ## Security
 
 - Never put GitHub tokens in any Gradle file inside the project
 - Never commit `~/.gradle/gradle.properties`
-- Use GitHub Actions `GITHUB_TOKEN` or repository secrets for CI
+- Use repository secrets for CI — no secrets needed for the Maven Central path
 - The `.gitignore` already excludes `local.properties` and all machine-specific files
