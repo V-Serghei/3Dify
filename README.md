@@ -312,11 +312,3 @@ gpr.user=YOUR_GITHUB_USERNAME
 gpr.key=YOUR_TOKEN_WITH_READ_PACKAGES
 ```
 
----
-
-## Security
-
-- Never put GitHub tokens in any Gradle file inside the project
-- Never commit `~/.gradle/gradle.properties`
-- Use repository secrets for CI — no secrets needed for the Maven Central path
-- The `.gitignore` already excludes `local.properties` and all machine-specific files
