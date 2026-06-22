@@ -14,7 +14,7 @@ activity = "1.13.0"
 constraintlayout = "2.2.1"
 navigationFragmentKtx = "2.9.8"
 navigationUiKtx = "2.9.8"
-coreVersion = "1.17.1"
+arsceneview = "2.2.1"
 navigationRuntimeKtx = "2.9.8"
 
 [libraries]
@@ -31,7 +31,7 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
-sceneform-core = { group = "com.google.ar.sceneform", name = "core", version.ref = "coreVersion" }
+arsceneview = { group = "io.github.sceneview", name = "arsceneview", version.ref = "arsceneview" }
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activity" }

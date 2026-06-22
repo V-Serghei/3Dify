@@ -35,7 +35,7 @@ viewerapp/            — Standalone OBJ viewer module
 | Language | Kotlin + C++ (NDK) |
 | Build | Gradle 8.14.5, AGP 8.13.2 |
 | AR / Depth | ARCore 1.54.0 |
-| 3D rendering | Google Sceneform 1.17.1 |
+| 3D rendering | SceneView (io.github.sceneview:arsceneview) 2.2.1 |
 | Point Cloud | PCL 1.9.1 via [pcl-android-arm64](https://github.com/V-Serghei/pcl-binaries-android-armv8) |
 | Python scripting | Chaquopy 17.0.0 (Python 3.10) |
 | Camera | CameraX 1.6.1 |
@@ -145,7 +145,7 @@ This fixes `libnativelib.so`. Other libraries in the warning dialog are third-pa
 | `libpclibrary.so` | `pcl-binaries-android-armv8` (your repo) | Fixed in AAR 1.0.4 |
 | `libarcore_sdk_jni.so` | Google ARCore | Wait for ARCore update |
 | `libchaquopy_java.so` / Python libs | Chaquopy | Wait for Chaquopy update |
-| `libarsceneview_jni.so` / Filament libs | Sceneform 1.17.1 (abandoned) | No fix available |
+| `libarsceneview_jni.so` / Filament libs | SceneView 2.2.1 (actively maintained) | Fixed — rebuild required |
 
 The warning is informational only — the app runs normally on all Android versions.
 

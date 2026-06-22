@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.google.ar.sceneform.ArSceneView
+    <io.github.sceneview.ar.ArSceneView
         android:id="@+id/ar_scene_view"
         android:layout_width="0dp"
         android:layout_height="0dp"

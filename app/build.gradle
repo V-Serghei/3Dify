@@ -71,7 +71,7 @@ dependencies {
     implementation libs.androidx.constraintlayout
     implementation libs.androidx.navigation.fragment.ktx
     implementation libs.androidx.navigation.ui.ktx
-    implementation libs.sceneform.core
+    implementation libs.arsceneview
     implementation libs.androidx.navigation.runtime.ktx
     implementation libs.androidx.navigation.runtime.ktx
     implementation project(':nativelib')
