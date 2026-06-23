@@ -17,10 +17,10 @@ package com.app.threedify.rawdepth
 
 import android.media.Image
 import android.opengl.Matrix
-import com.google.ar.core.Anchor
 import com.google.ar.core.CameraIntrinsics
 import com.google.ar.core.Frame
 import com.google.ar.core.Plane
+import com.google.ar.core.Pose
 import com.google.ar.core.TrackingState
 import com.google.ar.core.exceptions.NotYetAvailableException
 import java.nio.ByteBuffer
@@ -29,7 +29,6 @@ import java.nio.FloatBuffer
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.sqrt
-import kotlin.math.round
 
 /**
  * Converts depth data from ARCore depth images to 3D pointclouds. Points are added by calling the
@@ -37,14 +36,16 @@ import kotlin.math.round
  */
 object DepthData {
     const val FLOATS_PER_POINT: Int = 4 // X,Y,Z,confidence.
-    var maxNumberOfPointsToRender: Float = 20000f
-    var depthThreshold: Float = 1.5f
-    var confidenceThreshold: Float = 0.3f
+    var maxNumberOfPointsToRender: Float = 60000f
+    var minDepthThreshold: Float = 0.10f
+    var depthThreshold: Float = 2.5f
+    var confidenceThreshold: Float = 0.2f
     var planeDist: Float = 0.03f
+    var edgeFilterDeltaMeters: Float = 0.0f
 
 
 
-    fun create(frame: Frame, poseAnchor: Anchor): FloatBuffer? {
+    fun create(frame: Frame, cameraPose: Pose): FloatBuffer? {
         try {
             val depthImage = frame.acquireRawDepthImage16Bits()
             val confidenceImage = frame.acquireRawDepthConfidenceImage()
@@ -55,7 +56,7 @@ object DepthData {
             val intrinsics = frame.camera.textureIntrinsics
 
             val anchorMatrix = FloatArray(16)
-            poseAnchor.pose.toMatrix(anchorMatrix, 0)
+            cameraPose.toMatrix(anchorMatrix, 0)
             val points = convertRawDepthImagesTo3dPointBuffer(
                 depthImage, confidenceImage, intrinsics, anchorMatrix
             )
@@ -120,8 +121,11 @@ object DepthData {
 
         val step = ceil(sqrt((depthWidth * depthHeight / maxNumberOfPointsToRender).toDouble()))
             .toInt()
+            .coerceAtLeast(1)
 
-        val points = FloatBuffer.allocate(depthWidth / step * depthHeight / step * FLOATS_PER_POINT)
+        val sampledWidth = (depthWidth + step - 1) / step
+        val sampledHeight = (depthHeight + step - 1) / step
+        val points = FloatBuffer.allocate(sampledWidth * sampledHeight * FLOATS_PER_POINT)
         val pointCamera = FloatArray(4)
         val pointWorld = FloatArray(4)
 
@@ -139,6 +143,15 @@ object DepthData {
                     continue
                 }
                 val depthMeters = depthMillimeters / 1000.0f // Depth image pixels are in mm.
+                if (depthMeters < minDepthThreshold || depthMeters > depthThreshold) {
+                    x += step
+                    continue
+                }
+
+                if (isDepthEdge(depthBuffer, depthWidth, depthHeight, x, y, depthMeters)) {
+                    x += step
+                    continue
+                }
 
                 // Retrieves the confidence value for this pixel.
                 val confidencePixelValue =
@@ -146,7 +159,7 @@ object DepthData {
                             + x * confidenceImagePlane.pixelStride]
                 val confidenceNormalized =
                     ((confidencePixelValue.toInt() and 0xff).toFloat()) / 255.0f
-                if (confidenceNormalized < confidenceThreshold || depthMeters > depthThreshold) {
+                if (confidenceNormalized < confidenceThreshold) {
                     // Ignores "low-confidence" pixels.
                     x += step
                     continue
@@ -162,17 +175,44 @@ object DepthData {
                 // Applies model matrix to transform point into world coordinates.
                 Matrix.multiplyMV(pointWorld, 0, modelMatrix, 0, pointCamera, 0)
 
-                points.put(round(pointWorld[0] * 100) / 100) // X.
-                points.put(round(pointWorld[1] * 100) / 100) // Y.
-                points.put(round(pointWorld[2] * 100) / 100) // Z.
-                points.put(round(confidenceNormalized * 100) / 100) // C.
+                points.put(pointWorld[0]) // X.
+                points.put(pointWorld[1]) // Y.
+                points.put(pointWorld[2]) // Z.
+                points.put(confidenceNormalized) // C.
                 x += step
             }
             y += step
         }
 
-        points.rewind()
+        points.flip()
         return points
+    }
+
+    private fun isDepthEdge(
+        depthBuffer: java.nio.ShortBuffer,
+        width: Int,
+        height: Int,
+        x: Int,
+        y: Int,
+        depthMeters: Float
+    ): Boolean {
+        if (edgeFilterDeltaMeters <= 0f || x <= 0 || y <= 0 || x >= width - 1 || y >= height - 1) {
+            return false
+        }
+
+        val left = depthBuffer[y * width + x - 1].toInt() / 1000.0f
+        val right = depthBuffer[y * width + x + 1].toInt() / 1000.0f
+        val up = depthBuffer[(y - 1) * width + x].toInt() / 1000.0f
+        val down = depthBuffer[(y + 1) * width + x].toInt() / 1000.0f
+
+        return isInvalidNeighbor(left, depthMeters) ||
+            isInvalidNeighbor(right, depthMeters) ||
+            isInvalidNeighbor(up, depthMeters) ||
+            isInvalidNeighbor(down, depthMeters)
+    }
+
+    private fun isInvalidNeighbor(neighborDepthMeters: Float, depthMeters: Float): Boolean {
+        return neighborDepthMeters <= 0f || abs(neighborDepthMeters - depthMeters) > edgeFilterDeltaMeters
     }
 
     fun filterUsingPlanes(points: FloatBuffer, allPlanes: Collection<Plane>) {
