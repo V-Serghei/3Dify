@@ -36,12 +36,12 @@ import kotlin.math.sqrt
  */
 object DepthData {
     const val FLOATS_PER_POINT: Int = 4 // X,Y,Z,confidence.
-    var maxNumberOfPointsToRender: Float = 20000f
-    var minDepthThreshold: Float = 0.20f
-    var depthThreshold: Float = 1.5f
-    var confidenceThreshold: Float = 0.3f
+    var maxNumberOfPointsToRender: Float = 60000f
+    var minDepthThreshold: Float = 0.10f
+    var depthThreshold: Float = 2.5f
+    var confidenceThreshold: Float = 0.2f
     var planeDist: Float = 0.03f
-    var edgeFilterDeltaMeters: Float = 0.08f
+    var edgeFilterDeltaMeters: Float = 0.0f
 
 
 

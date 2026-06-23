@@ -10,6 +10,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <com.app.threedify.helpers.ManualSelectionOverlayView
+        android:id="@+id/manualSelectionOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
     <ImageButton
         android:id="@+id/back_button"
         android:layout_width="48dp"
@@ -65,9 +71,9 @@
 
     <LinearLayout
         android:id="@+id/action_controls"
-        android:layout_width="96dp"
+        android:layout_width="104dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center|end"
+        android:layout_gravity="center_vertical|end"
         android:layout_marginEnd="12dp"
         android:gravity="center"
         android:orientation="vertical">
@@ -94,39 +100,161 @@
             android:layout_marginTop="8dp"
             android:text="Reset"
             android:textSize="13sp" />
+    </LinearLayout>
 
-        <Button
-            android:id="@+id/testButton2"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="8dp"
-            android:text="Test"
-            android:textSize="13sp" />
+    <LinearLayout
+        android:id="@+id/status_panel"
+        android:layout_width="168dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="72dp"
+        android:background="#66000000"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="6dp">
 
         <TextView
             android:id="@+id/points_amount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="#66000000"
             android:gravity="center"
-            android:padding="6dp"
             android:text="P : 0"
             android:textColor="@android:color/white"
-            android:textSize="16sp" />
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/scan_quality"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:text="Ready 0%"
+            android:textColor="@android:color/white"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <HorizontalScrollView
+        android:id="@+id/toolControls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#AA101010"
+        android:fillViewport="false"
+        android:paddingStart="8dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="10dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/cleanScanButton"
+                android:layout_width="96dp"
+                android:layout_height="44dp"
+                android:text="Auto clean"
+                android:textSize="11sp" />
+
+            <Button
+                android:id="@+id/objectDetectButton"
+                android:layout_width="88dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="8dp"
+                android:text="Find obj"
+                android:textSize="11sp" />
+
+            <Button
+                android:id="@+id/previewModelButton"
+                android:layout_width="92dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="8dp"
+                android:text="Model pts"
+                android:textSize="11sp" />
+
+            <Button
+                android:id="@+id/selectPointsButton"
+                android:layout_width="84dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="8dp"
+                android:text="Area"
+                android:textSize="11sp" />
+
+            <Button
+                android:id="@+id/logScanButton"
+                android:layout_width="76dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="8dp"
+                android:text="Log"
+                android:textSize="11sp" />
+
+            <Button
+                android:id="@+id/testButton2"
+                android:layout_width="76dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="8dp"
+                android:text="Test"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <LinearLayout
+        android:id="@+id/selectionControls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#CC101010"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="14dp"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/removeSelectedButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Remove"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/keepSelectedButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="Keep"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/cancelSelectionButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="Cancel"
+            android:textSize="12sp" />
     </LinearLayout>
 
     <ScrollView
         android:id="@+id/settingsPanel"
         android:layout_width="match_parent"
-        android:layout_height="360dp"
+        android:layout_height="340dp"
         android:layout_gravity="bottom"
+        android:layout_marginBottom="64dp"
         android:background="#CC101010"
         android:fillViewport="false"
         android:paddingStart="16dp"
         android:paddingTop="12dp"
         android:paddingEnd="16dp"
-        android:paddingBottom="20dp"
+        android:paddingBottom="28dp"
         android:visibility="gone">
 
         <LinearLayout
