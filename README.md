@@ -196,22 +196,15 @@ After installing, **restart Android Studio** (or your terminal) so Chaquopy can 
 
 ## Setup
 
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/YOUR_ORG/3Dify.git
-cd 3Dify
-```
-
-### 2. Install NDK 26 and Python 3.10
+### 1. Install NDK 26 and Python 3.10
 
 See the prerequisite sections above.
 
-### 3. Open in Android Studio
+### 2. Open in Android Studio
 
 Open the `3Dify` folder and wait for Gradle sync to complete. Gradle downloads the PCL package from Maven Central automatically — no token needed.
 
-### 4. Build and run
+### 3. Build and run
 
 Connect a physical Android device (arm64, API 29+, depth camera required for full functionality) and press **Run**.
 
